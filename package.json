@@ -1,23 +1,23 @@
 {
-  "name": "@token-ring/javascript",
-  "version": "0.1.0",
-  "dependencies": {
-    "@token-ring/chat": "0.1.0",
-    "@token-ring/eslint-config": "0.0.0",
-    "@token-ring/filesystem": "0.1.0",
-    "@token-ring/registry": "0.1.0",
-    "execa": "^8.0.1",
-    "jscodeshift": "^17.3.0",
-    "jiti": "^2.4.2"
-  },
-  "exports": {
-    ".": "./index.js"
-  },
-  "private": true,
-  "scripts": {
-    "lint": "eslint ",
-    "test": "vitest run",
-    "eslint": "eslint --fix ./"
-  },
-  "type": "module"
+	"name": "@token-ring/javascript",
+	"version": "0.1.0",
+	"dependencies": {
+		"@token-ring/chat": "0.1.0",
+		"@token-ring/eslint-config": "0.0.0",
+		"@token-ring/filesystem": "0.1.0",
+		"@token-ring/registry": "0.1.0",
+		"execa": "^8.0.1",
+		"jscodeshift": "^17.3.0",
+		"jiti": "^2.4.2"
+	},
+	"exports": {
+		".": "./index.js"
+	},
+	"private": true,
+	"scripts": {
+		"lint": "eslint ",
+		"test": "vitest run",
+		"eslint": "eslint --fix ./"
+	},
+	"type": "module"
 }
