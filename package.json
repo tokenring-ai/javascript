@@ -13,7 +13,7 @@
 	"exports": {
 		".": "./index.js"
 	},
-	"private": true,
+	"license": "MIT",
 	"scripts": {
 		"lint": "eslint ",
 		"test": "vitest run",
