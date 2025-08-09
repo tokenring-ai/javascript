@@ -11,7 +11,8 @@
 		"jiti": "^2.4.2"
 	},
 	"exports": {
-		".": "./index.js"
+		".": "./index.ts",
+		"./*": "./*.ts"
 	},
 	"license": "MIT",
 	"scripts": {
