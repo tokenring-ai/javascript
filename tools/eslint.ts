@@ -1,7 +1,7 @@
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import { ESLint } from "eslint";
+import {ESLint} from "eslint";
 import ChatService from "@token-ring/chat/ChatService";
-import { z } from "zod";
+import {z} from "zod";
 import {Registry} from "@token-ring/registry";
 
 export interface EslintArgs {

@@ -3,12 +3,12 @@
 	"version": "0.1.0",
 	"dependencies": {
 		"@token-ring/chat": "0.1.0",
-
 		"@token-ring/filesystem": "0.1.0",
 		"@token-ring/registry": "0.1.0",
+		"eslint": "^9.33.0",
 		"execa": "^8.0.1",
-		"jscodeshift": "^17.3.0",
-		"jiti": "^2.4.2"
+		"jiti": "^2.4.2",
+		"jscodeshift": "^17.3.0"
 	},
 	"exports": {
 		".": "./index.ts",
@@ -16,9 +16,7 @@
 	},
 	"license": "MIT",
 	"scripts": {
-		"lint": "eslint ",
-		"test": "vitest run",
-		"eslint": "eslint --fix ./"
+		"test": "vitest run"
 	},
 	"type": "module"
 }

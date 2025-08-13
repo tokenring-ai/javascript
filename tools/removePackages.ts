@@ -1,6 +1,6 @@
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import { execute as runShellCommand } from "@token-ring/filesystem/tools/runShellCommand";
-import { z } from "zod";
+import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellCommand";
+import {z} from "zod";
 import {Registry} from "@token-ring/registry";
 
 export interface RemovePackagesArgs {
