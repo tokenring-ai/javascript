@@ -2,17 +2,18 @@ import FileSystemService from "@token-ring/filesystem/FileSystemService";
 import { ESLint } from "eslint";
 import ChatService from "@token-ring/chat/ChatService";
 import { z } from "zod";
+import {Registry} from "@token-ring/registry";
 
 export interface EslintArgs {
-	files: string[];
+	files?: string[];
 }
 
 export type EslintResult = { file: string; output?: string; error?: string };
 
-export default execute;
+
 export async function execute(
 	{ files }: EslintArgs,
-	registry: any,
+	registry: Registry,
 ): Promise<EslintResult[] | { error: string }> {
 	const chatService = registry.requireFirstServiceByType(ChatService);
 

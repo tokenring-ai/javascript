@@ -5,9 +5,10 @@ import { randomBytes } from "crypto";
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
 import ChatService from "@token-ring/chat/ChatService";
 import { z } from "zod";
+import {Registry} from "@token-ring/registry";
 
 export interface RunJavaScriptArgs {
-	script: string;
+	script?: string;
 	format?: "esm" | "commonjs";
 	timeoutSeconds?: number;
 	env?: Record<string, string>;
@@ -26,7 +27,6 @@ export interface RunJavaScriptResult {
 /**
  * Runs a JavaScript script in the working directory using Node.js.
  */
-export default execute;
 export async function execute(
 	{
 		script,
@@ -35,16 +35,10 @@ export async function execute(
 		env = {},
 		workingDirectory,
 	}: RunJavaScriptArgs,
-	registry: any,
+	registry: Registry,
 ): Promise<RunJavaScriptResult | { error: string }> {
 	const chatService = registry.requireFirstServiceByType(ChatService);
 	const filesystem = registry.requireFirstServiceByType(FileSystemService);
-	if (!filesystem) {
-		chatService.errorLine(
-			`[ERROR] FileSystem not found, can't perform file operations without knowing the base directory for file paths`,
-		);
-		return { error: "Couldn't perform file operation due to application misconfiguration, do not retry." };
-	}
 
 	const cwd = filesystem.relativeOrAbsolutePathToAbsolutePath(
 		workingDirectory ?? "./",

@@ -1,15 +1,16 @@
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import runShellCommand from "@token-ring/filesystem/tools/runShellCommand";
+import { execute as runShellCommand } from "@token-ring/filesystem/tools/runShellCommand";
 import { z } from "zod";
+import {Registry} from "@token-ring/registry";
 
 export interface RemovePackagesArgs {
-	packageName: string;
+	packageName?: string;
 }
 
-export default execute;
+
 export async function execute(
 	{ packageName }: RemovePackagesArgs,
-	registry: any,
+	registry: Registry,
 ): Promise<any> {
 	const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
