@@ -24,12 +24,12 @@ export async function execute(
 		// Initialize ESLint
 		const eslint = new ESLint({
 			fix: true,
-			useEslintrc: true,
 		});
 
-		for (const file of files) {
+ 	const filesArr = files ?? [];
+ 	for (const file of filesArr) {
 			const filePath = filesystem.relativeOrAbsolutePathToAbsolutePath(file);
-			const relFile = filesystem.resolve(filePath);
+			const relFile = filesystem.relativeOrAbsolutePathToRelativePath(filePath);
 
 			try {
 				// Read source file
@@ -41,7 +41,7 @@ export async function execute(
 
 				if (result.output && result.output !== source) {
 					// Write fixed code back to file
-					await filesystem.writeFile(filePath, result.output, "utf8");
+					await filesystem.writeFile(filePath, result.output);
 					results.push({ file: relFile, output: "Successfully fixed" });
 					chatService.infoLine(`Applied ESLint fixes on ${relFile}`);
 					filesystem.setDirty(true);

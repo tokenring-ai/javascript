@@ -14,7 +14,7 @@ export async function execute(
 ): Promise<any> {
 	const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
-	if (filesystem.existsSync("pnpm-lock.yaml")) {
+	if (await filesystem.exists("pnpm-lock.yaml")) {
 		return runShellCommand(
 			{
 				command: `pnpm remove ${packageName}`,
@@ -23,7 +23,7 @@ export async function execute(
 		);
 	}
 
-	if (filesystem.existsSync("yarn.lock")) {
+	if (await filesystem.exists("yarn.lock")) {
 		return runShellCommand(
 			{
 				command: `yarn remove ${packageName}`,
@@ -32,7 +32,7 @@ export async function execute(
 		);
 	}
 
-	if (filesystem.existsSync("package-lock.json")) {
+	if (await filesystem.exists("package-lock.json")) {
 		return runShellCommand(
 			{
 				command: `npm uninstall ${packageName}`,

@@ -15,7 +15,7 @@ export async function execute(
 ): Promise<any> {
 	const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
-	if (filesystem.existsSync("pnpm-lock.yaml")) {
+	if (await filesystem.exists("pnpm-lock.yaml")) {
 		return runShellCommand(
 			{
 				command: `pnpm add ${isDev ? "-D " : ""} ${packageName}`,
@@ -24,7 +24,7 @@ export async function execute(
 		);
 	}
 
-	if (filesystem.existsSync("yarn.lock")) {
+	if (await filesystem.exists("yarn.lock")) {
 		return runShellCommand(
 			{
 				command: `yarn add ${isDev ? "--dev " : ""} ${packageName}`,
@@ -32,7 +32,7 @@ export async function execute(
 			registry,
 		);
 	}
-	if (filesystem.existsSync("package-lock.json")) {
+	if (await filesystem.exists("package-lock.json")) {
 		return runShellCommand(
 			{
 				command: `npm install ${isDev ? "--save-dev " : ""} ${packageName}`,
