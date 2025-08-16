@@ -10,12 +10,14 @@ export interface EslintArgs {
 
 export type EslintResult = { file: string; output?: string; error?: string };
 
-
 export async function execute(
 	{ files }: EslintArgs,
 	registry: Registry,
 ): Promise<EslintResult[] | { error: string }> {
 	const chatService = registry.requireFirstServiceByType(ChatService);
+
+	// Prefix all chat output with the tool name
+	const toolName = "eslint";
 
 	const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
@@ -26,8 +28,8 @@ export async function execute(
 			fix: true,
 		});
 
- 	const filesArr = files ?? [];
- 	for (const file of filesArr) {
+		const filesArr = files ?? [];
+		for (const file of filesArr) {
 			const filePath = filesystem.relativeOrAbsolutePathToAbsolutePath(file);
 			const relFile = filesystem.relativeOrAbsolutePathToRelativePath(filePath);
 
@@ -43,17 +45,15 @@ export async function execute(
 					// Write fixed code back to file
 					await filesystem.writeFile(filePath, result.output);
 					results.push({ file: relFile, output: "Successfully fixed" });
-					chatService.infoLine(`Applied ESLint fixes on ${relFile}`);
+					chatService.infoLine(`[${toolName}] Applied ESLint fixes on ${relFile}`);
 					filesystem.setDirty(true);
 				} else {
 					results.push({ file: relFile, output: "No changes needed" });
-					chatService.infoLine(`[INFO] No changes needed for ${relFile}`);
+					chatService.infoLine(`[${toolName}] No changes needed for ${relFile}`);
 				}
 			} catch (err: any) {
 				results.push({ file: relFile, error: err.message });
-				chatService.errorLine(
-					`[ERROR] ESLint fix on ${relFile}: ${err.message}`,
-				);
+				chatService.errorLine(`[${toolName}] ESLint fix on ${relFile}: ${err.message}`);
 			}
 		}
 	} catch (e: any) {

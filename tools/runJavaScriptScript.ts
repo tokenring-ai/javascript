@@ -20,7 +20,7 @@ export interface RunJavaScriptResult {
 	exitCode?: number;
 	stdout?: string;
 	stderr?: string;
-	error?: string | null;
+	error?: string;
 	format: "esm" | "commonjs";
 }
 
@@ -92,28 +92,17 @@ export async function execute(
 				exitCode: exitCode,
 				stdout: stdout?.trim() || "",
 				stderr: stderr?.trim() || "",
-				error: null,
 				format,
 			};
 		} catch (err: any) {
-			return {
-				ok: false,
-				exitCode: typeof err.exitCode === "number" ? err.exitCode : 1,
-				stdout: err.stdout?.trim() || "",
-				stderr: err.stderr?.trim() || "",
-				error: err.shortMessage || err.message,
-				format,
-			};
+			// Return only the error message as per new error format
+			return { error: err.shortMessage || err.message };
 		}
 	} catch (err: any) {
 		chatService.errorLine(
 			`[runJavaScriptScript] Error creating temporary script file: ${err.message}`,
 		);
-		return {
-			ok: false,
-			error: `Error creating temporary script file: ${err.message}`,
-			format,
-		};
+		return { error: `Error creating temporary script file: ${err.message}` };
 	} finally {
 		// Clean up the temporary file
 		try {
