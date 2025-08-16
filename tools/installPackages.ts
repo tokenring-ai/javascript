@@ -1,8 +1,8 @@
+import ChatService from "@token-ring/chat/ChatService";
 import FileSystemService, {ExecuteCommandResult} from "@token-ring/filesystem/FileSystemService";
 import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellCommand";
-import {z} from "zod";
 import {Registry} from "@token-ring/registry";
-import ChatService from "@token-ring/chat/ChatService";
+import {z} from "zod";
 
 export interface InstallPackagesArgs {
   packageName?: string;
@@ -15,15 +15,15 @@ export interface InstallPackagesArgs {
  * Errors are returned as a structured object: { error: string }.
  */
 export async function execute(
-  { isDev = false, packageName }: InstallPackagesArgs,
+  {isDev = false, packageName}: InstallPackagesArgs,
   registry: Registry,
-): Promise<ExecuteCommandResult|{ error: string }> {
+): Promise<ExecuteCommandResult | { error: string }> {
   const filesystem = registry.requireFirstServiceByType(FileSystemService);
   const chatService = registry.requireFirstServiceByType(ChatService);
   const toolName = "installPackages";
 
   if (!packageName) {
-    return { error: "packageName is required" };
+    return {error: "packageName is required"};
   }
 
   try {
@@ -59,10 +59,10 @@ export async function execute(
     }
 
     // No lock file found – cannot determine package manager
-    return { error: "No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json)." };
+    return {error: "No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json)."};
   } catch (e: any) {
     // Return a structured error object
-    return { error: e.message };
+    return {error: e.message};
   }
 }
 

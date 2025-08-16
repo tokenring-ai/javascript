@@ -1,73 +1,73 @@
-import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {ESLint} from "eslint";
 import ChatService from "@token-ring/chat/ChatService";
-import {z} from "zod";
+import FileSystemService from "@token-ring/filesystem/FileSystemService";
 import {Registry} from "@token-ring/registry";
+import {ESLint} from "eslint";
+import {z} from "zod";
 
 export interface EslintArgs {
-	files?: string[];
+  files?: string[];
 }
 
 export type EslintResult = { file: string; output?: string; error?: string };
 
 export async function execute(
-	{ files }: EslintArgs,
-	registry: Registry,
+  {files}: EslintArgs,
+  registry: Registry,
 ): Promise<EslintResult[] | { error: string }> {
-	const chatService = registry.requireFirstServiceByType(ChatService);
+  const chatService = registry.requireFirstServiceByType(ChatService);
 
-	// Prefix all chat output with the tool name
-	const toolName = "eslint";
+  // Prefix all chat output with the tool name
+  const toolName = "eslint";
 
-	const filesystem = registry.requireFirstServiceByType(FileSystemService);
+  const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
-	const results: EslintResult[] = [];
-	try {
-		// Initialize ESLint
-		const eslint = new ESLint({
-			fix: true,
-		});
+  const results: EslintResult[] = [];
+  try {
+    // Initialize ESLint
+    const eslint = new ESLint({
+      fix: true,
+    });
 
-		const filesArr = files ?? [];
-		for (const file of filesArr) {
-			const filePath = filesystem.relativeOrAbsolutePathToAbsolutePath(file);
-			const relFile = filesystem.relativeOrAbsolutePathToRelativePath(filePath);
+    const filesArr = files ?? [];
+    for (const file of filesArr) {
+      const filePath = filesystem.relativeOrAbsolutePathToAbsolutePath(file);
+      const relFile = filesystem.relativeOrAbsolutePathToRelativePath(filePath);
 
-			try {
-				// Read source file
-				const source = await filesystem.readFile(filePath, "utf8");
+      try {
+        // Read source file
+        const source = await filesystem.readFile(filePath, "utf8");
 
-				// Run ESLint fix
-				const lintResults = await eslint.lintText(source, { filePath });
-				const [result] = lintResults;
+        // Run ESLint fix
+        const lintResults = await eslint.lintText(source, {filePath});
+        const [result] = lintResults;
 
-				if (result.output && result.output !== source) {
-					// Write fixed code back to file
-					await filesystem.writeFile(filePath, result.output);
-					results.push({ file: relFile, output: "Successfully fixed" });
-					chatService.infoLine(`[${toolName}] Applied ESLint fixes on ${relFile}`);
-					filesystem.setDirty(true);
-				} else {
-					results.push({ file: relFile, output: "No changes needed" });
-					chatService.infoLine(`[${toolName}] No changes needed for ${relFile}`);
-				}
-			} catch (err: any) {
-				results.push({ file: relFile, error: err.message });
-				chatService.errorLine(`[${toolName}] ESLint fix on ${relFile}: ${err.message}`);
-			}
-		}
-	} catch (e: any) {
-		return { error: `Failed to run ESLint: ${e.message}` };
-	}
-	return results;
+        if (result.output && result.output !== source) {
+          // Write fixed code back to file
+          await filesystem.writeFile(filePath, result.output);
+          results.push({file: relFile, output: "Successfully fixed"});
+          chatService.infoLine(`[${toolName}] Applied ESLint fixes on ${relFile}`);
+          filesystem.setDirty(true);
+        } else {
+          results.push({file: relFile, output: "No changes needed"});
+          chatService.infoLine(`[${toolName}] No changes needed for ${relFile}`);
+        }
+      } catch (err: any) {
+        results.push({file: relFile, error: err.message});
+        chatService.errorLine(`[${toolName}] ESLint fix on ${relFile}: ${err.message}`);
+      }
+    }
+  } catch (e: any) {
+    return {error: `Failed to run ESLint: ${e.message}`};
+  }
+  return results;
 }
 
 export const description =
-	"Run ESLint with --fix option on JavaScript/TypeScript files in the codebase to automatically fix code style issues.";
+  "Run ESLint with --fix option on JavaScript/TypeScript files in the codebase to automatically fix code style issues.";
 export const parameters = z.object({
-	files: z
-		.array(z.string())
-		.describe(
-			"List of JavaScript/TypeScript file paths to apply ESLint fixes to.",
-		),
+  files: z
+    .array(z.string())
+    .describe(
+      "List of JavaScript/TypeScript file paths to apply ESLint fixes to.",
+    ),
 });
