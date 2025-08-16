@@ -4,6 +4,9 @@ import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellC
 import {Registry} from "@token-ring/registry";
 import {z} from "zod";
 
+// Exported tool name following the required pattern
+export const name = "javascript/installPackages";
+
 export interface InstallPackagesArgs {
   packageName?: string;
   isDev?: boolean;
@@ -11,25 +14,24 @@ export interface InstallPackagesArgs {
 
 /**
  * Install a package using the detected package manager.
- * All chatService output is prefixed with `[installPackages]`.
- * Errors are returned as a structured object: { error: string }.
+ * All chatService output is prefixed with `[${name}]`.
+ * Errors are thrown as exceptions rather than returned.
  */
 export async function execute(
   {isDev = false, packageName}: InstallPackagesArgs,
   registry: Registry,
-): Promise<ExecuteCommandResult | { error: string }> {
+): Promise<ExecuteCommandResult> {
   const filesystem = registry.requireFirstServiceByType(FileSystemService);
   const chatService = registry.requireFirstServiceByType(ChatService);
-  const toolName = "installPackages";
 
   if (!packageName) {
-    return {error: "packageName is required"};
+    throw new Error(`[${name}] packageName is required`);
   }
 
   try {
     // Detect package manager and run appropriate command
     if (await filesystem.exists("pnpm-lock.yaml")) {
-      chatService.infoLine(`[${toolName}] Detected pnpm, installing ${packageName}`);
+      chatService.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
       return await runShellCommand(
         {
           command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
@@ -39,7 +41,7 @@ export async function execute(
     }
 
     if (await filesystem.exists("yarn.lock")) {
-      chatService.infoLine(`[${toolName}] Detected yarn, installing ${packageName}`);
+      chatService.infoLine(`[${name}] Detected yarn, installing ${packageName}`);
       return await runShellCommand(
         {
           command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
@@ -49,7 +51,7 @@ export async function execute(
     }
 
     if (await filesystem.exists("package-lock.json")) {
-      chatService.infoLine(`[${toolName}] Detected npm, installing ${packageName}`);
+      chatService.infoLine(`[${name}] Detected npm, installing ${packageName}`);
       return await runShellCommand(
         {
           command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,
@@ -59,10 +61,12 @@ export async function execute(
     }
 
     // No lock file found – cannot determine package manager
-    return {error: "No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json)."};
+    throw new Error(
+      `[${name}] No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json).`
+    );
   } catch (e: any) {
-    // Return a structured error object
-    return {error: e.message};
+    // Re‑throw with proper prefix
+    throw new Error(`[${name}] ${e.message}`);
   }
 }
 

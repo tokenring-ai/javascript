@@ -3,25 +3,25 @@ import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellC
 import {Registry} from "@token-ring/registry";
 import {z} from "zod";
 
+export const name = "javascript/removePackages";
+
 export interface RemovePackagesArgs {
   packageName?: string;
 }
 
 /**
  * Executes the package removal using the detected package manager.
- * Returns raw command output without tool name prefix; any informational
- * messages should be emitted by the chat service separately.
- * Errors are returned as an object matching the TypeScript type `{ error: string; }`.
+ * Returns raw command output without tool name prefix.
  */
 export async function execute(
   {packageName}: RemovePackagesArgs,
   registry: Registry,
-): Promise<ExecuteCommandResult | { error: string }> {
+): Promise<ExecuteCommandResult> {
   const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
   // Validate input
   if (!packageName || packageName.trim() === "") {
-    return {error: "Package name must be provided."};
+    throw new Error(`[${name}] package name must be provided.`);
   }
 
   // Determine which lockfile exists to infer the package manager
@@ -56,7 +56,7 @@ export async function execute(
   }
 
   // No lockfile detected – cannot determine package manager
-  return {error: "Unable to detect package manager (no lockfile found)."};
+  throw new Error(`[${name}] unable to detect package manager (no lockfile found).`);
 }
 
 export const description =

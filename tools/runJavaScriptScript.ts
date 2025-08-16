@@ -1,11 +1,13 @@
 import ChatService from "@token-ring/chat/ChatService";
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {Registry} from "@token-ring/registry";
-import {randomBytes} from "crypto";
-import {execa, execaSync} from "execa";
-import {writeFile} from "fs/promises";
-import {join} from "path";
-import {z} from "zod";
+import { Registry } from "@token-ring/registry";
+import { randomBytes } from "crypto";
+import { execa, execaSync } from "execa";
+import { writeFile } from "fs/promises";
+import { join } from "path";
+import { z } from "zod";
+
+export const name = "javascript/runJavaScriptScript";
 
 export interface RunJavaScriptArgs {
   script?: string;
@@ -20,7 +22,6 @@ export interface RunJavaScriptResult {
   exitCode?: number;
   stdout?: string;
   stderr?: string;
-  error?: string;
   format: "esm" | "commonjs";
 }
 
@@ -36,7 +37,7 @@ export async function execute(
     workingDirectory,
   }: RunJavaScriptArgs,
   registry: Registry,
-): Promise<RunJavaScriptResult | { error: string }> {
+): Promise<RunJavaScriptResult> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
@@ -45,20 +46,20 @@ export async function execute(
   );
 
   if (!script) {
-    chatService.errorLine("[runJavaScriptScript] script is required");
-    return {error: "script is required"};
+    throw new Error(`[${name}] script is required`);
   }
 
   // Validate format
   if (format !== "esm" && format !== "commonjs") {
-    chatService.errorLine(
-      `[runJavaScriptScript] Invalid format: ${format}. Must be "esm" or "commonjs"`,
+    throw new Error(
+      `[${name}] Invalid format: ${format}. Must be "esm" or "commonjs"`,
     );
-    return {error: `Invalid format: ${format}. Must be "esm" or "commonjs"`};
   }
 
   // Create a temporary file with the script content
-  const tempFileName = `temp-script-${randomBytes(4).toString("hex")}${format === "esm" ? ".mjs" : ".cjs"}`;
+  const tempFileName = `temp-script-${randomBytes(4).toString("hex")}${
+    format === "esm" ? ".mjs" : ".cjs"
+  }`;
   const tempFilePath = join(cwd, tempFileName);
 
   try {
@@ -68,50 +69,42 @@ export async function execute(
     const timeout = Math.max(5, Math.min(timeoutSeconds || 30, 300));
     const execOpts = {
       cwd,
-      env: {...process.env, ...env},
+      env: { ...process.env, ...env },
       timeout: timeout * 1000,
       maxBuffer: 1024 * 1024,
     };
 
     // Determine the command to run based on the format
     // For `node --input-type=module script.mjs` or `node script.cjs`
-    const nodeArgs = format === "esm" ? ["--input-type=module", tempFilePath] : [tempFilePath];
+    const nodeArgs =
+      format === "esm" ? ["--input-type=module", tempFilePath] : [tempFilePath];
 
     chatService.infoLine(
-      `[runJavaScriptScript] Running JavaScript script in ${format} format (cwd=${workingDirectory || "./"})`,
+      `[${name}] Running JavaScript script in ${format} format (cwd=${workingDirectory || "./"})`,
     );
 
-    try {
-      const {stdout, stderr, exitCode} = await execa(
-        "node",
-        nodeArgs,
-        execOpts as any,
-      );
-      return {
-        ok: true,
-        exitCode: exitCode,
-        stdout: stdout?.trim() || "",
-        stderr: stderr?.trim() || "",
-        format,
-      };
-    } catch (err: any) {
-      // Return only the error message as per new error format
-      return {error: err.shortMessage || err.message};
-    }
-  } catch (err: any) {
-    chatService.errorLine(
-      `[runJavaScriptScript] Error creating temporary script file: ${err.message}`,
+    const { stdout, stderr, exitCode } = await execa(
+      "node",
+      nodeArgs,
+      execOpts as any,
     );
-    return {error: `Error creating temporary script file: ${err.message}`};
+    return {
+      ok: true,
+      exitCode: exitCode,
+      stdout: stdout?.trim() || "",
+      stderr: stderr?.trim() || "",
+      format,
+    };
+  } catch (err: any) {
+    // Throw errors instead of returning them
+    throw new Error(`[${name}] ${err.shortMessage || err.message}`);
   } finally {
     // Clean up the temporary file
     try {
       // Using execaSync for cleanup
-      execaSync("rm", ["-f", tempFilePath], {cwd} as any);
-    } catch (err: any) {
-      chatService.errorLine(
-        `[runJavaScriptScript] Error cleaning up temporary script file: ${err.message}`,
-      );
+      execaSync("rm", ["-f", tempFilePath], { cwd } as any);
+    } catch {
+      // Swallow cleanup errors; they are not critical for tool operation
     }
   }
 }

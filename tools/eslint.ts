@@ -1,8 +1,10 @@
 import ChatService from "@token-ring/chat/ChatService";
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {Registry} from "@token-ring/registry";
-import {ESLint} from "eslint";
-import {z} from "zod";
+import { Registry } from "@token-ring/registry";
+import { ESLint } from "eslint";
+import { z } from "zod";
+
+export const name = "javascript/eslint";
 
 export interface EslintArgs {
   files?: string[];
@@ -11,19 +13,16 @@ export interface EslintArgs {
 export type EslintResult = { file: string; output?: string; error?: string };
 
 export async function execute(
-  {files}: EslintArgs,
+  { files }: EslintArgs,
   registry: Registry,
-): Promise<EslintResult[] | { error: string }> {
+): Promise<EslintResult[]> {
   const chatService = registry.requireFirstServiceByType(ChatService);
-
-  // Prefix all chat output with the tool name
-  const toolName = "eslint";
 
   const filesystem = registry.requireFirstServiceByType(FileSystemService);
 
   const results: EslintResult[] = [];
   try {
-    // Initialize ESLint
+    // Initialize ESLint with fix enabled
     const eslint = new ESLint({
       fix: true,
     });
@@ -38,26 +37,26 @@ export async function execute(
         const source = await filesystem.readFile(filePath, "utf8");
 
         // Run ESLint fix
-        const lintResults = await eslint.lintText(source, {filePath});
+        const lintResults = await eslint.lintText(source, { filePath });
         const [result] = lintResults;
 
         if (result.output && result.output !== source) {
           // Write fixed code back to file
           await filesystem.writeFile(filePath, result.output);
-          results.push({file: relFile, output: "Successfully fixed"});
-          chatService.infoLine(`[${toolName}] Applied ESLint fixes on ${relFile}`);
+          results.push({ file: relFile, output: "Successfully fixed" });
+          chatService.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
           filesystem.setDirty(true);
         } else {
-          results.push({file: relFile, output: "No changes needed"});
-          chatService.infoLine(`[${toolName}] No changes needed for ${relFile}`);
+          results.push({ file: relFile, output: "No changes needed" });
+          chatService.infoLine(`[${name}] No changes needed for ${relFile}`);
         }
       } catch (err: any) {
-        results.push({file: relFile, error: err.message});
-        chatService.errorLine(`[${toolName}] ESLint fix on ${relFile}: ${err.message}`);
+        results.push({ file: relFile, error: err.message });
+        chatService.errorLine(`[${name}] ESLint fix on ${relFile}: ${err.message}`);
       }
     }
   } catch (e: any) {
-    return {error: `Failed to run ESLint: ${e.message}`};
+    throw new Error(`[${name}] Failed to run ESLint: ${e.message}`);
   }
   return results;
 }
