@@ -28,7 +28,6 @@ export async function execute(
     throw new Error(`[${name}] packageName is required`);
   }
 
-  try {
     // Detect package manager and run appropriate command
     if (await filesystem.exists("pnpm-lock.yaml")) {
       chatService.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
@@ -64,10 +63,6 @@ export async function execute(
     throw new Error(
       `[${name}] No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json).`
     );
-  } catch (e: any) {
-    // Re‑throw with proper prefix
-    throw new Error(`[${name}] ${e.message}`);
-  }
 }
 
 export const description =

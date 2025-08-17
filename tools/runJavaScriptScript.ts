@@ -13,7 +13,6 @@ export interface RunJavaScriptArgs {
   script?: string;
   format?: "esm" | "commonjs";
   timeoutSeconds?: number;
-  env?: Record<string, string>;
   workingDirectory?: string;
 }
 
@@ -33,7 +32,6 @@ export async function execute(
     script,
     format = "esm",
     timeoutSeconds = 30,
-    env = {},
     workingDirectory,
   }: RunJavaScriptArgs,
   registry: Registry,
@@ -69,7 +67,7 @@ export async function execute(
     const timeout = Math.max(5, Math.min(timeoutSeconds || 30, 300));
     const execOpts = {
       cwd,
-      env: { ...process.env, ...env },
+      env: { ...process.env},
       timeout: timeout * 1000,
       maxBuffer: 1024 * 1024,
     };
@@ -126,7 +124,6 @@ export const parameters = z.object({
     .max(300)
     .default(30)
     .describe("Timeout for the script in seconds (default 30, max 300)"),
-  env: z.record(z.string()).optional().describe("Environment variables"),
   workingDirectory: z
     .string()
     .optional()
