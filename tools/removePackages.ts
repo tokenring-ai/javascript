@@ -26,33 +26,30 @@ export async function execute(
 
   // Determine which lockfile exists to infer the package manager
   if (await filesystem.exists("pnpm-lock.yaml")) {
-    const result = await runShellCommand(
+    return await runShellCommand(
       {
         command: `pnpm remove ${packageName}`,
       },
       registry,
     );
-    return result;
   }
 
   if (await filesystem.exists("yarn.lock")) {
-    const result = await runShellCommand(
+    return await runShellCommand(
       {
         command: `yarn remove ${packageName}`,
       },
       registry,
     );
-    return result;
   }
 
   if (await filesystem.exists("package-lock.json")) {
-    const result = await runShellCommand(
+    return await runShellCommand(
       {
         command: `npm uninstall ${packageName}`,
       },
       registry,
     );
-    return result;
   }
 
   // No lockfile detected – cannot determine package manager
@@ -61,7 +58,7 @@ export async function execute(
 
 export const description =
   "Removes a package using the detected package manager (pnpm, npm, yarn)";
-export const parameters = z.object({
+export const inputSchema = z.object({
   packageName: z
     .string()
     .describe("One or more package names to remove, separated by spaces."),

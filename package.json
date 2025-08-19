@@ -1,22 +1,22 @@
 {
-	"name": "@token-ring/javascript",
-	"version": "0.1.0",
-	"dependencies": {
-		"@token-ring/chat": "0.1.0",
-		"@token-ring/filesystem": "0.1.0",
-		"@token-ring/registry": "0.1.0",
-		"eslint": "^9.33.0",
-		"execa": "^9.6.0",
-		"jiti": "^2.5.1",
-		"jscodeshift": "^17.3.0"
-	},
-	"exports": {
-		".": "./index.ts",
-		"./*": "./*.ts"
-	},
-	"license": "MIT",
-	"scripts": {
-		"test": "vitest run"
-	},
-	"type": "module"
+ "name": "@token-ring/javascript",
+ "version": "0.1.0",
+ "dependencies": {
+  "@token-ring/chat": "0.1.0",
+  "@token-ring/filesystem": "0.1.0",
+  "@token-ring/registry": "0.1.0",
+  "eslint": "^9.33.0",
+  "execa": "^9.6.0",
+  "jiti": "^2.5.1",
+  "jscodeshift": "^17.3.0"
+ },
+ "exports": {
+  ".": "./index.ts",
+  "./*": "./*.ts"
+ },
+ "license": "MIT",
+ "scripts": {
+  "test": "vitest run"
+ },
+ "type": "module"
 }

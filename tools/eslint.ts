@@ -1,8 +1,8 @@
 import ChatService from "@token-ring/chat/ChatService";
 import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import { Registry } from "@token-ring/registry";
-import { ESLint } from "eslint";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {ESLint} from "eslint";
+import {z} from "zod";
 
 export const name = "javascript/eslint";
 
@@ -13,7 +13,7 @@ export interface EslintArgs {
 export type EslintResult = { file: string; output?: string; error?: string };
 
 export async function execute(
-  { files }: EslintArgs,
+  {files}: EslintArgs,
   registry: Registry,
 ): Promise<EslintResult[]> {
   const chatService = registry.requireFirstServiceByType(ChatService);
@@ -37,21 +37,21 @@ export async function execute(
         const source = await filesystem.readFile(filePath, "utf8");
 
         // Run ESLint fix
-        const lintResults = await eslint.lintText(source, { filePath });
+        const lintResults = await eslint.lintText(source, {filePath});
         const [result] = lintResults;
 
         if (result.output && result.output !== source) {
           // Write fixed code back to file
           await filesystem.writeFile(filePath, result.output);
-          results.push({ file: relFile, output: "Successfully fixed" });
+          results.push({file: relFile, output: "Successfully fixed"});
           chatService.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
           filesystem.setDirty(true);
         } else {
-          results.push({ file: relFile, output: "No changes needed" });
+          results.push({file: relFile, output: "No changes needed"});
           chatService.infoLine(`[${name}] No changes needed for ${relFile}`);
         }
       } catch (err: any) {
-        results.push({ file: relFile, error: err.message });
+        results.push({file: relFile, error: err.message});
         chatService.errorLine(`[${name}] ESLint fix on ${relFile}: ${err.message}`);
       }
     }
@@ -63,7 +63,7 @@ export async function execute(
 
 export const description =
   "Run ESLint with --fix option on JavaScript/TypeScript files in the codebase to automatically fix code style issues.";
-export const parameters = z.object({
+export const inputSchema = z.object({
   files: z
     .array(z.string())
     .describe(
