@@ -1,4 +1,5 @@
-import FileSystemService, {ExecuteCommandResult} from "@token-ring/filesystem/FileSystemService";
+import {ExecuteCommandResult} from "@token-ring/filesystem/FileSystemProvider";
+import FileSystemService from "@token-ring/filesystem/FileSystemService";
 import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellCommand";
 import {Registry} from "@token-ring/registry";
 import {z} from "zod";
