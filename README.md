@@ -1,4 +1,4 @@
-# @token-ring/javascript
+# @tokenring-ai/javascript
 
 Utilities for working with JavaScript/TypeScript projects in the Token Ring ecosystem. This package exposes a small set
 of tools that help you:
@@ -15,14 +15,14 @@ invoked programmatically.
 This package is part of the Token Ring monorepo and is normally consumed via workspace tooling. If you need the package
 name and version:
 
-- Name: `@token-ring/javascript`
+- Name: `@tokenring-ai/javascript`
 - Version: `0.1.0`
 
 Peer packages typically present in a Token Ring app:
 
-- `@token-ring/registry`
-- `@token-ring/filesystem`
-- `@token-ring/chat`
+- `@tokenring-ai/registry`
+- `@tokenring-ai/filesystem`
+- `@tokenring-ai/chat`
 
 ## Exports
 
@@ -57,8 +57,8 @@ Behavior:
 Example (programmatic):
 
 ```ts
-import {tools as jsTools} from "@token-ring/javascript";
-import {ServiceRegistry} from "@token-ring/registry";
+import {tools as jsTools} from "@tokenring-ai/javascript";
+import {ServiceRegistry} from "@tokenring-ai/registry";
 
 const registry = new ServiceRegistry();
 // ...register FileSystemService and ChatService here...
@@ -173,8 +173,8 @@ Notes:
 ## Development
 
 - Scripts:
-- `pnpm -F @token-ring/javascript test` — run tests (if present in this package)
-- `pnpm -F @token-ring/javascript eslint` — run ESLint with `--fix` over the package
+- `pnpm -F @tokenring-ai/javascript test` — run tests (if present in this package)
+- `pnpm -F @tokenring-ai/javascript eslint` — run ESLint with `--fix` over the package
 
 - Requirements:
 - Node.js 18+

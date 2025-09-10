@@ -1,6 +1,5 @@
-import ChatService from "@token-ring/chat/ChatService";
-import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {ESLint} from "eslint";
 import {z} from "zod";
 
@@ -14,11 +13,10 @@ export type EslintResult = { file: string; output?: string; error?: string };
 
 export async function execute(
   {files}: EslintArgs,
-  registry: Registry,
+  agent: Agent,
 ): Promise<EslintResult[]> {
-  const chatService = registry.requireFirstServiceByType(ChatService);
 
-  const filesystem = registry.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireFirstServiceByType(FileSystemService);
 
   const results: EslintResult[] = [];
   try {
@@ -44,15 +42,15 @@ export async function execute(
           // Write fixed code back to file
           await filesystem.writeFile(filePath, result.output);
           results.push({file: relFile, output: "Successfully fixed"});
-          chatService.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
+          agent.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
           filesystem.setDirty(true);
         } else {
           results.push({file: relFile, output: "No changes needed"});
-          chatService.infoLine(`[${name}] No changes needed for ${relFile}`);
+          agent.infoLine(`[${name}] No changes needed for ${relFile}`);
         }
       } catch (err: any) {
         results.push({file: relFile, error: err.message});
-        chatService.errorLine(`[${name}] ESLint fix on ${relFile}: ${err.message}`);
+        agent.errorLine(`[${name}] ESLint fix on ${relFile}: ${err.message}`);
       }
     }
   } catch (e: any) {

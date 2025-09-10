@@ -1,7 +1,7 @@
-import {ExecuteCommandResult} from "@token-ring/filesystem/FileSystemProvider";
-import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellCommand";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
+import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
 import {z} from "zod";
 
 export const name = "javascript/removePackages";
@@ -16,9 +16,9 @@ export interface RemovePackagesArgs {
  */
 export async function execute(
   {packageName}: RemovePackagesArgs,
-  registry: Registry,
+  agent: Agent,
 ): Promise<ExecuteCommandResult> {
-  const filesystem = registry.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireFirstServiceByType(FileSystemService);
 
   // Validate input
   if (!packageName || packageName.trim() === "") {
@@ -31,7 +31,7 @@ export async function execute(
       {
         command: `pnpm remove ${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 
@@ -40,7 +40,7 @@ export async function execute(
       {
         command: `yarn remove ${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 
@@ -49,7 +49,7 @@ export async function execute(
       {
         command: `npm uninstall ${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 

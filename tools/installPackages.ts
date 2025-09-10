@@ -1,8 +1,7 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {ExecuteCommandResult} from "@token-ring/filesystem/FileSystemProvider";
-import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {execute as runShellCommand} from "@token-ring/filesystem/tools/runShellCommand";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
+import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
 import {z} from "zod";
 
 // Exported tool name following the required pattern
@@ -15,15 +14,14 @@ export interface InstallPackagesArgs {
 
 /**
  * Install a package using the detected package manager.
- * All chatService output is prefixed with `[${name}]`.
+ * All agent output is prefixed with `[${name}]`.
  * Errors are thrown as exceptions rather than returned.
  */
 export async function execute(
   {isDev = false, packageName}: InstallPackagesArgs,
-  registry: Registry,
+  agent: Agent,
 ): Promise<ExecuteCommandResult> {
-  const filesystem = registry.requireFirstServiceByType(FileSystemService);
-  const chatService = registry.requireFirstServiceByType(ChatService);
+  const filesystem = agent.requireFirstServiceByType(FileSystemService);
 
   if (!packageName) {
     throw new Error(`[${name}] packageName is required`);
@@ -31,32 +29,32 @@ export async function execute(
 
   // Detect package manager and run appropriate command
   if (await filesystem.exists("pnpm-lock.yaml")) {
-    chatService.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
+    agent.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
     return await runShellCommand(
       {
         command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 
   if (await filesystem.exists("yarn.lock")) {
-    chatService.infoLine(`[${name}] Detected yarn, installing ${packageName}`);
+    agent.infoLine(`[${name}] Detected yarn, installing ${packageName}`);
     return await runShellCommand(
       {
         command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 
   if (await filesystem.exists("package-lock.json")) {
-    chatService.infoLine(`[${name}] Detected npm, installing ${packageName}`);
+    agent.infoLine(`[${name}] Detected npm, installing ${packageName}`);
     return await runShellCommand(
       {
         command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,
       },
-      registry,
+      agent,
     );
   }
 

@@ -1,6 +1,11 @@
-export const name = "@token-ring/javascript";
-export const description =
-  "JavaScript refactoring and code transformation using jscodeshift codemods.";
-export const version = "0.1.0";
+import {TokenRingPackage} from "@tokenring-ai/agent";
+import packageJSON from './package.json' with {type: 'json'};
+import * as tools from "./tools.ts";
 
-export * as tools from "./tools.ts";
+export const packageInfo: TokenRingPackage = {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
+  tools
+};
+

@@ -1,8 +1,6 @@
-import ChatService from "@token-ring/chat/ChatService";
-import FileSystemService from "@token-ring/filesystem/FileSystemService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {randomBytes} from "crypto";
-import {execa} from "execa";
 import {z} from "zod";
 
 export const name = "javascript/runJavaScriptScript";
@@ -32,10 +30,9 @@ export async function execute(
     timeoutSeconds = 30,
     workingDirectory,
   }: RunJavaScriptArgs,
-  registry: Registry,
+  agent: Agent,
 ): Promise<RunJavaScriptResult> {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const filesystem = registry.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireFirstServiceByType(FileSystemService);
 
   if (!script) {
     throw new Error(`[${name}] script is required`);
@@ -59,7 +56,7 @@ export async function execute(
 
     timeoutSeconds = Math.max(5, Math.min(timeoutSeconds || 30, 300));
 
-    chatService.infoLine(
+    agent.infoLine(
       `[${name}] Running JavaScript script in ${format} format`,
     );
 
