@@ -1,186 +1,169 @@
-# @tokenring-ai/javascript
+# JavaScript Package Documentation
 
-Utilities for working with JavaScript/TypeScript projects in the Token Ring ecosystem. This package exposes a small set
-of tools that help you:
+## Overview
 
-- Run ESLint with automatic fixes over files
-- Install or remove npm packages using the package manager found in your repo
-- Execute quick throwaway JavaScript snippets with Node.js (ESM or CommonJS)
+The `@tokenring-ai/javascript` package provides integration tools for JavaScript development and execution within the TokenRing AI agent ecosystem. It enables AI agents to perform tasks such as running JavaScript scripts in a sandboxed environment, installing and removing npm packages using detected package managers (npm, yarn, pnpm), and automatically fixing code style issues with ESLint. This package is designed for use in AI-driven coding assistants, allowing agents to interact with JavaScript codebases securely via the `@tokenring-ai/filesystem` service.
 
-The package is designed to be used from a Token Ring registry (services + tools), but the individual tools can also be
-invoked programmatically.
+The package exports a `TokenRingPackage` object that registers four main tools: `eslint`, `installPackages`, `removePackages`, and `runJavaScriptScript`. These tools leverage the agent's filesystem and logging capabilities for operations within a virtual filesystem.
 
-## Installation
+## Installation/Setup
 
-This package is part of the Token Ring monorepo and is normally consumed via workspace tooling. If you need the package
-name and version:
+This package is intended for integration into TokenRing AI agent projects. Install it via npm:
 
-- Name: `@tokenring-ai/javascript`
-- Version: `0.1.0`
-
-Peer packages typically present in a Token Ring app:
-
-- `@tokenring-ai/registry`
-- `@tokenring-ai/filesystem`
-- `@tokenring-ai/chat`
-
-## Exports
-
-- `tools.eslint` — Run ESLint with fixes
-- `tools.installPackages` — Install one or more packages via pnpm/yarn/npm
-- `tools.removePackages` — Remove packages via pnpm/yarn/npm
-- `tools.runJavaScriptScript` — Execute an ad-hoc JS script with Node (esm or commonjs)
-
----
-
-## Tool: tools.eslint
-
-Run ESLint with the `--fix` option on one or more files. Writes changes back to disk when fixes are produced.
-
-Signature:
-
-- `async execute({ files }, registry): Promise<EslintResult[] | { error: string }>`
-
-Parameters:
-
-- `files: string[]` — Paths of JS/TS files to lint and fix.
-
-Behavior:
-
-- Uses your local ESLint configuration (`useEslintrc: true`).
-- For each file:
-- Lints the in-memory source
-- Writes fixed code if ESLint produced changes
-- Returns a per-file result `{ file, output? | error? }`
-- Logs progress and errors through `ChatService`.
-
-Example (programmatic):
-
-```ts
-import {tools as jsTools} from "@tokenring-ai/javascript";
-import {ServiceRegistry} from "@tokenring-ai/registry";
-
-const registry = new ServiceRegistry();
-// ...register FileSystemService and ChatService here...
-
-const result = await jsTools.eslint.execute({files: ["src/index.ts", "src/util.ts"]}, registry);
-console.log(result);
+```bash
+npm install @tokenring-ai/javascript
 ```
 
----
+Ensure you have the peer dependencies installed:
 
-## Tool: tools.installPackages
+- `@tokenring-ai/agent` (for agent context)
+- `@tokenring-ai/filesystem` (for file operations)
 
-Installs packages using the first detected package manager in your repo.
+The package uses ES modules (`type: "module"`) and supports Node.js environments. No additional build steps are required for basic usage, but run `npm test` with Vitest for verification.
 
-Supported managers (auto-detected by lock file):
+## Package Structure
 
-- pnpm (when `pnpm-lock.yaml` exists)
-- yarn (when `yarn.lock` exists)
-- npm (when `package-lock.json` exists)
+The package follows a simple structure:
 
-Signature:
+- **index.ts**: Main entry point. Exports the `TokenRingPackage` with package metadata and tools.
+- **tools.ts**: Re-exports individual tools for modularity.
+- **tools/eslint.ts**: Tool for running ESLint with auto-fix on JS/TS files.
+- **tools/installPackages.ts**: Tool for installing npm packages via detected manager.
+- **tools/removePackages.ts**: Tool for removing npm packages.
+- **tools/runJavaScriptScript.ts**: Tool for executing JS scripts in ESM or CommonJS format.
+- **package.json**: Defines metadata, dependencies, and exports.
+- **LICENSE**: MIT license file.
+- **README.md**: This documentation.
 
-- `async execute({ packageName, isDev }, registry): Promise<any>`
+Directories are auto-created as needed during operations.
 
-Parameters:
+## Core Components
 
-- `packageName: string` — One or more package names separated by spaces (e.g., "eslint@^9 prettier").
-- `isDev?: boolean` — Install as a dev dependency (default false).
+The package revolves around four tools, each with an `execute` function that takes arguments and an `Agent` instance. Tools use Zod schemas for input validation and return structured results. They interact via the agent's `FileSystemService` for file I/O and command execution.
 
-Examples:
+### ESLint Tool
 
-```ts
-await jsTools.installPackages.execute({packageName: "eslint prettier", isDev: true}, registry);
+**Description**: Runs ESLint with the `--fix` option on specified JavaScript/TypeScript files to automatically resolve code style issues. It reads files, applies fixes, writes changes back if any, and logs results. Supports relative or absolute paths.
+
+**Key Methods/Properties**:
+- `execute({ files }: EslintArgs, agent: Agent): Promise<EslintResult[]>`
+  - `files`: Array of file paths (optional; if omitted, may process defaults but typically specify).
+  - Returns: Array of `{ file: string; output?: string; error?: string }` objects.
+
+**Interactions**: Uses `FileSystemService` to read/write files and agent's logging for info/error messages. Sets filesystem as dirty on changes.
+
+### Install Packages Tool
+
+**Description**: Detects the package manager (pnpm, yarn, npm) from lockfiles and installs one or more packages. Throws errors if no manager is detected or input is invalid.
+
+**Key Methods/Properties**:
+- `execute({ packageName, isDev = false }: InstallPackagesArgs, agent: Agent): Promise<ExecuteCommandResult>`
+  - `packageName`: Required string of package names (space-separated for multiples).
+  - `isDev`: Boolean to install as dev dependency.
+  - Returns: Command execution result with stdout, stderr, exitCode, etc.
+
+**Interactions**: Delegates to `runShellCommand` from filesystem tools, prefixing logs with `[javascript/installPackages]`.
+
+### Remove Packages Tool
+
+**Description**: Similar to install, but removes packages using the detected package manager. Supports space-separated package names.
+
+**Key Methods/Properties**:
+- `execute({ packageName }: RemovePackagesArgs, agent: Agent): Promise<ExecuteCommandResult>`
+  - `packageName`: Required string of package names.
+  - Returns: Command execution result.
+
+**Interactions**: Uses `runShellCommand` and logs with `[javascript/removePackages]`.
+
+### Run JavaScript Script Tool
+
+**Description**: Executes JavaScript code in a temporary file using Node.js, supporting ESM or CommonJS formats. Runs in the agent's working directory with configurable timeout. Cleans up temp files afterward.
+
+**Key Methods/Properties**:
+- `execute({ script, format = 'esm', timeoutSeconds = 30, workingDirectory }: RunJavaScriptArgs, agent: Agent): Promise<RunJavaScriptResult>`
+  - `script`: Required string of JS code.
+  - `format`: 'esm' or 'commonjs'.
+  - `timeoutSeconds`: Integer (5-300s).
+  - Returns: `{ ok: boolean; exitCode?: number; stdout?: string; stderr?: string; format: string }`.
+
+**Interactions**: Writes to temp file via `FileSystemService`, executes with `executeCommand`, and logs execution details.
+
+## Usage Examples
+
+### 1. Running a Simple JS Script
+In an agent context, invoke the tool to compute something:
+
+```typescript
+import { createAgent } from '@tokenring-ai/agent';
+// Assume agent is set up with filesystem
+
+const result = await agent.tools.javascript.runJavaScriptScript.execute({
+  script: 'console.log("Hello from JS!"); console.log(2 + 2);',
+  format: 'esm',
+  timeoutSeconds: 10
+}, agent);
+
+console.log(result.stdout); // "Hello from JS!\n4"
 ```
 
----
+### 2. Installing a Package
+```typescript
+const result = await agent.tools.javascript.installPackages.execute({
+  packageName: 'lodash',
+  isDev: false
+}, agent);
 
-## Tool: tools.removePackages
-
-Removes packages using the first detected package manager.
-
-Signature:
-
-- `async execute({ packageName }, registry): Promise<any>`
-
-Parameters:
-
-- `packageName: string` — One or more package names separated by spaces.
-
-Example:
-
-```ts
-await jsTools.removePackages.execute({packageName: "eslint prettier"}, registry);
+if (result.ok) {
+  console.log('Package installed:', result.stdout);
+}
 ```
 
----
+### 3. Fixing Code with ESLint
+```typescript
+const results = await agent.tools.javascript.eslint.execute({
+  files: ['src/main.ts']
+}, agent);
 
-## Tool: tools.runJavaScriptScript
-
-Runs a small JavaScript snippet in Node.js by writing it to a temporary file and executing it. Supports both ESM and
-CommonJS.
-
-Signature:
-
--
-
-`async execute({ script, format, timeoutSeconds, env, workingDirectory }, registry): Promise<RunJavaScriptResult | { error: string }>`
-
-Parameters:
-
-- `script: string` — The JavaScript code to execute.
-- `format?: "esm" | "commonjs"` — Module format (default `"esm"`).
-- `timeoutSeconds?: number` — Execution timeout in seconds (min 5, max 300, default 30).
-- `env?: Record<string,string>` — Additional environment variables for the process.
-- `workingDirectory?: string` — Working directory relative to the repository root.
-
-Returns `RunJavaScriptResult` on success or failure:
-
-- `ok: boolean`
-- `exitCode?: number`
-- `stdout?: string`
-- `stderr?: string`
-- `error?: string | null`
-- `format: "esm" | "commonjs"`
-
-Example (ESM):
-
-```ts
-const res = await jsTools.runJavaScriptScript.execute({
-  script: "console.log('hello from esm')",
-  format: "esm",
-}, registry);
-console.log(res.stdout);
+results.forEach(r => {
+  if (r.output) console.log(`${r.file}: ${r.output}`);
+  else if (r.error) console.error(`${r.file}: ${r.error}`);
+});
 ```
 
-Example (CommonJS):
+## Configuration Options
 
-```ts
-const res = await jsTools.runJavaScriptScript.execute({
-  script: "console.log(require('path').sep)",
-  format: "commonjs",
-}, registry);
-```
+- **ESLint**: Configured with `fix: true` by default. Uses global ESLint config from the project.
+- **Package Management**: Auto-detects from lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`). No custom config.
+- **Script Execution**: `timeoutSeconds` (default 30s, clamped 5-300s). `format` defaults to ESM. `workingDirectory` optional.
+- Environment: Relies on Node.js for execution; ensure it's available in the agent's runtime.
 
-Notes:
+No additional environment variables or configs are exposed.
 
-- The tool creates a temporary .mjs or .cjs file in the working directory and removes it afterwards.
-- Output and errors are captured and returned; failures include `exitCode` and `stderr`.
+## API Reference
 
----
+- **TokenRingPackage** (from index.ts): `{ name: string; version: string; description: string; tools: object }`
+- **Tools** (from tools.ts):
+  - `eslint`: `{ name: string; description: string; inputSchema: ZodSchema; execute: Function }`
+  - `installPackages`: Similar structure.
+  - `removePackages`: Similar.
+  - `runJavaScriptScript`: Similar, with result typing.
 
-## Development
+Each `execute` function requires an `Agent` instance and validates inputs via Zod. Errors are thrown with prefixed messages.
 
-- Scripts:
-- `pnpm -F @tokenring-ai/javascript test` — run tests (if present in this package)
-- `pnpm -F @tokenring-ai/javascript eslint` — run ESLint with `--fix` over the package
+## Dependencies
 
-- Requirements:
-- Node.js 18+
-- A workspace that provides the Token Ring services you intend to use at runtime (Registry, FileSystemService,
-  ChatService).
+- `@tokenring-ai/agent` (^0.1.0): Agent framework.
+- `@tokenring-ai/filesystem` (^0.1.0): Filesystem operations.
+- `eslint` (^9.33.0): Linting and fixing.
+- `execa` (^9.6.0): Command execution (internal).
+- `jiti` (^2.5.1): Runtime transpilation.
+- `jscodeshift` (^17.3.0): Code transformation utilities.
+- `zod`: Schema validation.
 
-## License
+## Contributing/Notes
 
-MIT
+- **Testing**: Run `npm test` with Vitest.
+- **Building**: No build step; direct ES module usage.
+- **Limitations**: Script execution is sandboxed but uses Node.js directly—avoid untrusted code. Package management assumes lockfiles exist. ESLint requires valid JS/TS syntax.
+- **License**: MIT.
+- Contributions: Fork, add features/tests, and submit PRs. Focus on enhancing tool safety and integration.
