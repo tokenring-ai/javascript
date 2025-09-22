@@ -16,7 +16,7 @@ export async function execute(
   agent: Agent,
 ): Promise<EslintResult[]> {
 
-  const filesystem = agent.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireServiceByType(FileSystemService);
 
   const results: EslintResult[] = [];
   try {

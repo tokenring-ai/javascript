@@ -21,7 +21,7 @@ export async function execute(
   {isDev = false, packageName}: InstallPackagesArgs,
   agent: Agent,
 ): Promise<ExecuteCommandResult> {
-  const filesystem = agent.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireServiceByType(FileSystemService);
 
   if (!packageName) {
     throw new Error(`[${name}] packageName is required`);

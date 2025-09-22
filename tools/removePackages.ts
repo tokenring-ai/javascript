@@ -18,7 +18,7 @@ export async function execute(
   {packageName}: RemovePackagesArgs,
   agent: Agent,
 ): Promise<ExecuteCommandResult> {
-  const filesystem = agent.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireServiceByType(FileSystemService);
 
   // Validate input
   if (!packageName || packageName.trim() === "") {

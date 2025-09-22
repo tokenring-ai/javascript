@@ -32,7 +32,7 @@ export async function execute(
   }: RunJavaScriptArgs,
   agent: Agent,
 ): Promise<RunJavaScriptResult> {
-  const filesystem = agent.requireFirstServiceByType(FileSystemService);
+  const filesystem = agent.requireServiceByType(FileSystemService);
 
   if (!script) {
     throw new Error(`[${name}] script is required`);
