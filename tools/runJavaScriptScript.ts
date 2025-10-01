@@ -52,7 +52,7 @@ export async function execute(
 
   try {
     // Write the script to a temporary file
-    await filesystem.writeFile(tempFileName, script);
+    await filesystem.writeFile(tempFileName, script, agent);
 
     timeoutSeconds = Math.max(5, Math.min(timeoutSeconds || 30, 300));
 
@@ -72,7 +72,7 @@ export async function execute(
       format,
     };
   } finally {
-    await filesystem.deleteFile(tempFileName);
+    await filesystem.deleteFile(tempFileName, agent);
   }
 }
 
