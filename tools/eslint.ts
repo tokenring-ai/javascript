@@ -40,7 +40,7 @@ export async function execute(
 
         if (result.output && result.output !== source) {
           // Write fixed code back to file
-          await filesystem.writeFile(filePath, result.output, agent);
+          await filesystem.writeFile(filePath, result.output);
           results.push({file: relFile, output: "Successfully fixed"});
           agent.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
           filesystem.setDirty(true);
