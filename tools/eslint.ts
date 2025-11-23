@@ -1,9 +1,10 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {ESLint} from "eslint";
 import {z} from "zod";
 
-export const name = "javascript/eslint";
+const name = "javascript/eslint";
 
 export interface EslintArgs {
   files?: string[];
@@ -11,8 +12,8 @@ export interface EslintArgs {
 
 export type EslintResult = { file: string; output?: string; error?: string };
 
-export async function execute(
-  {files}: EslintArgs,
+async function execute(
+  {files}: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<EslintResult[]> {
 
@@ -59,12 +60,16 @@ export async function execute(
   return results;
 }
 
-export const description =
+const description =
   "Run ESLint with --fix option on JavaScript/TypeScript files in the codebase to automatically fix code style issues.";
-export const inputSchema = z.object({
+const inputSchema = z.object({
   files: z
     .array(z.string())
     .describe(
       "List of JavaScript/TypeScript file paths to apply ESLint fixes to.",
     ),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

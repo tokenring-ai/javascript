@@ -1,9 +1,10 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {randomBytes} from "crypto";
 import {z} from "zod";
 
-export const name = "javascript/runJavaScriptScript";
+const name = "javascript/runJavaScriptScript";
 
 export interface RunJavaScriptArgs {
   script?: string;
@@ -23,13 +24,12 @@ export interface RunJavaScriptResult {
 /**
  * Runs a JavaScript script in the working directory using Node.js.
  */
-export async function execute(
+async function execute(
   {
     script,
     format = "esm",
     timeoutSeconds = 30,
-    workingDirectory,
-  }: RunJavaScriptArgs,
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<RunJavaScriptResult> {
   const filesystem = agent.requireServiceByType(FileSystemService);
@@ -76,9 +76,9 @@ export async function execute(
   }
 }
 
-export const description =
+const description =
   "Run a JavaScript script in the working directory using Node.js. Specify whether the code is in ES module or CommonJS format.";
-export const inputSchema = z.object({
+const inputSchema = z.object({
   script: z.string().describe("The JavaScript code to execute. Code is executed in the root directory of the project."),
   format: z
     .enum(["esm", "commonjs"])
@@ -94,3 +94,7 @@ export const inputSchema = z.object({
     .default(30)
     .describe("Timeout for the script in seconds (default 30, max 300)"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

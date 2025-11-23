@@ -1,11 +1,12 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
 import {z} from "zod";
 
 // Exported tool name following the required pattern
-export const name = "javascript/installPackages";
+const name = "javascript/installPackages";
 
 export interface InstallPackagesArgs {
   packageName?: string;
@@ -17,8 +18,8 @@ export interface InstallPackagesArgs {
  * All agent output is prefixed with `[${name}]`.
  * Errors are thrown as exceptions rather than returned.
  */
-export async function execute(
-  {isDev = false, packageName}: InstallPackagesArgs,
+async function execute(
+  {isDev = false, packageName}: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<ExecuteCommandResult> {
   const filesystem = agent.requireServiceByType(FileSystemService);
@@ -64,11 +65,15 @@ export async function execute(
   );
 }
 
-export const description =
+const description =
   "Installs a package using the detected package manager (pnpm, npm, yarn)";
-export const inputSchema = z.object({
+const inputSchema = z.object({
   packageName: z
     .string()
     .describe("One or more package names to install, separated by spaces."),
   isDev: z.boolean().default(false).describe("Install as dev dependency"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

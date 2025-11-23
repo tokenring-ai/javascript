@@ -1,10 +1,11 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
 import {z} from "zod";
 
-export const name = "javascript/removePackages";
+const name = "javascript/removePackages";
 
 export interface RemovePackagesArgs {
   packageName?: string;
@@ -14,8 +15,8 @@ export interface RemovePackagesArgs {
  * Executes the package removal using the detected package manager.
  * Returns raw command output without tool name prefix.
  */
-export async function execute(
-  {packageName}: RemovePackagesArgs,
+async function execute(
+  {packageName}: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<ExecuteCommandResult> {
   const filesystem = agent.requireServiceByType(FileSystemService);
@@ -57,10 +58,14 @@ export async function execute(
   throw new Error(`[${name}] unable to detect package manager (no lockfile found).`);
 }
 
-export const description =
+const description =
   "Removes a package using the detected package manager (pnpm, npm, yarn)";
-export const inputSchema = z.object({
+const inputSchema = z.object({
   packageName: z
     .string()
     .describe("One or more package names to remove, separated by spaces."),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;
