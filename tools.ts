@@ -1,4 +1,11 @@
-export {default as eslint} from "./tools/eslint.ts";
-export {default as installPackages} from "./tools/installPackages.ts";
-export {default as removePackages} from "./tools/removePackages.ts";
-export {default as runJavaScriptScript} from "./tools/runJavaScriptScript.ts";
+import {default as eslint} from "./tools/eslint.ts";
+import {default as installPackages} from "./tools/installPackages.ts";
+import {default as removePackages} from "./tools/removePackages.ts";
+import {default as runJavaScriptScript} from "./tools/runJavaScriptScript.ts";
+
+export default {
+  eslint,
+  installPackages,
+  removePackages,
+  runJavaScriptScript,
+};
