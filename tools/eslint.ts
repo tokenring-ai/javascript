@@ -28,30 +28,27 @@ async function execute(
 
     const filesArr = files ?? [];
     for (const file of filesArr) {
-      const filePath = filesystem.relativeOrAbsolutePathToAbsolutePath(file);
-      const relFile = filesystem.relativeOrAbsolutePathToRelativePath(filePath);
-
       try {
         // Read source file
-        const source = await filesystem.readFile(filePath, "utf8");
+        const source = await filesystem.readFile(file, "utf8");
 
         // Run ESLint fix
-        const lintResults = await eslint.lintText(source, {filePath});
+        const lintResults = await eslint.lintText(source, {filePath: file});
         const [result] = lintResults;
 
         if (result.output && result.output !== source) {
           // Write fixed code back to file
-          await filesystem.writeFile(filePath, result.output);
-          results.push({file: relFile, output: "Successfully fixed"});
-          agent.infoLine(`[${name}] Applied ESLint fixes on ${relFile}`);
+          await filesystem.writeFile(file, result.output);
+          results.push({file: file, output: "Successfully fixed"});
+          agent.infoLine(`[${name}] Applied ESLint fixes on ${file}`);
           filesystem.setDirty(true);
         } else {
-          results.push({file: relFile, output: "No changes needed"});
-          agent.infoLine(`[${name}] No changes needed for ${relFile}`);
+          results.push({file: file, output: "No changes needed"});
+          agent.infoLine(`[${name}] No changes needed for ${file}`);
         }
       } catch (err: any) {
-        results.push({file: relFile, error: err.message});
-        agent.errorLine(`[${name}] ESLint fix on ${relFile}: ${err.message}`);
+        results.push({file: file, error: err.message});
+        agent.errorLine(`[${name}] ESLint fix on ${file}: ${err.message}`);
       }
     }
   } catch (e: any) {
