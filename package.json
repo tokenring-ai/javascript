@@ -1,25 +1,25 @@
 {
- "name": "@tokenring-ai/javascript",
- "description": "TokenRing Coder Javascript Intregration",
- "version": "0.2.0",
- "dependencies": {
-  "@tokenring-ai/app": "0.2.0",
-  "@tokenring-ai/chat": "0.2.0",
-  "zod": "^4.1.13",
-  "@tokenring-ai/agent": "0.2.0",
-  "@tokenring-ai/filesystem": "0.2.0",
-  "eslint": "^9.39.1",
-  "execa": "^9.6.0",
-  "jiti": "^2.6.1",
-  "jscodeshift": "^17.3.0"
- },
- "exports": {
-  ".": "./index.ts",
-  "./*": "./*.ts"
- },
- "license": "MIT",
- "scripts": {
-  "test": "vitest run"
- },
- "type": "module"
+  "name": "@tokenring-ai/javascript",
+  "description": "TokenRing Coder Javascript Intregration",
+  "version": "0.2.0",
+  "dependencies": {
+    "@tokenring-ai/app": "0.2.0",
+    "@tokenring-ai/chat": "0.2.0",
+    "zod": "^4.1.13",
+    "@tokenring-ai/agent": "0.2.0",
+    "@tokenring-ai/filesystem": "0.2.0",
+    "eslint": "^9.39.1",
+    "execa": "^9.6.1",
+    "jiti": "^2.6.1",
+    "jscodeshift": "^17.3.0"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "type": "module"
 }
