@@ -5,10 +5,10 @@
   "dependencies": {
     "@tokenring-ai/app": "0.2.0",
     "@tokenring-ai/chat": "0.2.0",
-    "zod": "^4.1.13",
+    "zod": "catalog:",
     "@tokenring-ai/agent": "0.2.0",
     "@tokenring-ai/filesystem": "0.2.0",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "execa": "^9.6.1",
     "jiti": "^2.6.1",
     "jscodeshift": "^17.3.0"
