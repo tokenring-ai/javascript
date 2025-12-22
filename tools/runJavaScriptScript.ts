@@ -4,7 +4,7 @@ import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {randomBytes} from "crypto";
 import {z} from "zod";
 
-const name = "javascript/runJavaScriptScript";
+const name = "javascript_runJavaScriptScript";
 
 export interface RunJavaScriptArgs {
   script?: string;

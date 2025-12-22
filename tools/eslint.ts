@@ -4,7 +4,7 @@ import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {ESLint} from "eslint";
 import {z} from "zod";
 
-const name = "javascript/eslint";
+const name = "javascript_eslint";
 
 export interface EslintArgs {
   files?: string[];

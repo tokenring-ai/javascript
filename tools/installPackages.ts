@@ -6,7 +6,7 @@ import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShel
 import {z} from "zod";
 
 // Exported tool name following the required pattern
-const name = "javascript/installPackages";
+const name = "javascript_installPackages";
 
 export interface InstallPackagesArgs {
   packageName?: string;

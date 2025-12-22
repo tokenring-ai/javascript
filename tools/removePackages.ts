@@ -5,7 +5,7 @@ import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
 import {z} from "zod";
 
-const name = "javascript/removePackages";
+const name = "javascript_removePackages";
 
 export interface RemovePackagesArgs {
   packageName?: string;
