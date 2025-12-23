@@ -5,14 +5,6 @@ import {randomBytes} from "crypto";
 import {z} from "zod";
 
 const name = "javascript_runJavaScriptScript";
-
-export interface RunJavaScriptArgs {
-  script?: string;
-  format?: "esm" | "commonjs";
-  timeoutSeconds?: number;
-  workingDirectory?: string;
-}
-
 export interface RunJavaScriptResult {
   ok: boolean;
   exitCode?: number;

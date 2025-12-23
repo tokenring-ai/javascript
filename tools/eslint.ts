@@ -6,10 +6,6 @@ import {z} from "zod";
 
 const name = "javascript_eslint";
 
-export interface EslintArgs {
-  files?: string[];
-}
-
 export type EslintResult = { file: string; output?: string; error?: string };
 
 async function execute(
