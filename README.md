@@ -2,23 +2,23 @@
 
 ## Overview
 
-The `@tokenring-ai/javascript` package provides JavaScript development tools for the TokenRing AI ecosystem. This package integrates with TokenRing agents to enable JavaScript/TypeScript code analysis, package management, and script execution capabilities.
+The `@tokenring-ai/javascript` package provides JavaScript/TypeScript development tools for the TokenRing AI ecosystem. This package integrates with TokenRing agents to enable code linting, package management, and script execution capabilities. It serves as a plugin for TokenRing AI agents, providing specialized tools for JavaScript development workflows.
 
 ## Installation
 
 ```bash
-npm install @tokenring-ai/javascript
+bun install @tokenring-ai/javascript
 ```
 
 ## Package Purpose
 
-This package serves as a plugin for TokenRing AI agents, providing specialized tools for JavaScript development workflows. It registers tools that allow AI agents to:
+This package registers tools that allow AI agents to:
 
-- Run ESLint with auto-fix on JavaScript/TypeScript files
-- Install and remove npm packages using detected package managers
-- Execute JavaScript scripts in both ESM and CommonJS formats
+- Run ESLint with auto-fix on JavaScript/TypeScript files to automatically fix code style issues
+- Install and remove bun packages using detected package managers (pnpm, npm, yarn)
+- Execute JavaScript scripts in both ESM and CommonJS formats with timeout controls
 
-## Usage
+## Package Structure
 
 The package exports a `TokenRingPlugin` that integrates with the TokenRing app framework:
 
@@ -29,11 +29,11 @@ import {TokenRingPlugin} from "@tokenring-ai/app";
 
 export default {
   name: "@tokenring-ai/javascript",
-  version: "0.1.0",
+  version: "0.2.0",
   description: "TokenRing Coder Javascript Integration",
   install(app: TokenRingApp) {
     app.waitForService(ChatService, chatService =>
-      chatService.addTools(packageJSON.name, tools)
+      chatService.addTools("@tokenring-ai/javascript", tools)
     );
   }
 } satisfies TokenRingPlugin;
@@ -41,7 +41,7 @@ export default {
 
 ## Available Tools
 
-### 1. eslint (`javascript/eslint`)
+### 1. eslint (`javascript_eslint`)
 
 **Description**: Run ESLint with `--fix` option on JavaScript/TypeScript files to automatically fix code style issues.
 
@@ -52,7 +52,7 @@ export default {
 
 **Example**:
 ```typescript
-const results = await agent.tools.javascript.eslint.execute({
+const results = await agent.tools.javascript_eslint.execute({
   files: ['src/main.ts', 'utils/helper.js']
 }, agent);
 
@@ -65,7 +65,7 @@ results.forEach(result => {
 });
 ```
 
-### 2. installPackages (`javascript/installPackages`)
+### 2. installPackages (`javascript_installPackages`)
 
 **Description**: Install packages using the detected package manager (npm, yarn, or pnpm)
 
@@ -77,7 +77,7 @@ results.forEach(result => {
 
 **Example**:
 ```typescript
-const result = await agent.tools.javascript.installPackages.execute({
+const result = await agent.tools.javascript_installPackages.execute({
   packageName: 'lodash',
   isDev: false
 }, agent);
@@ -87,7 +87,7 @@ if (result.ok) {
 }
 ```
 
-### 3. removePackages (`javascript/removePackages`)
+### 3. removePackages (`javascript_removePackages`)
 
 **Description**: Remove packages using the detected package manager
 
@@ -98,7 +98,7 @@ if (result.ok) {
 
 **Example**:
 ```typescript
-const result = await agent.tools.javascript.removePackages.execute({
+const result = await agent.tools.javascript_removePackages.execute({
   packageName: 'lodash'
 }, agent);
 
@@ -107,9 +107,9 @@ if (result.ok) {
 }
 ```
 
-### 4. runJavaScriptScript (`javascript/runJavaScriptScript`)
+### 4. runJavaScriptScript (`javascript_runJavaScriptScript`)
 
-**Description**: Execute JavaScript code in a temporary file using Node.js
+**Description**: Execute JavaScript code in a temporary file using Node.js with timeout control
 
 **Parameters**:
 - `script` (string): JavaScript code to execute
@@ -120,7 +120,7 @@ if (result.ok) {
 
 **Example**:
 ```typescript
-const result = await agent.tools.javascript.runJavaScriptScript.execute({
+const result = await agent.tools.javascript_runJavaScriptScript.execute({
   script: 'console.log("Hello from JavaScript!"); console.log(2 + 2);',
   format: 'esm',
   timeoutSeconds: 10
@@ -144,10 +144,10 @@ If no supported lockfile is found, an error will be thrown.
 
 ## Dependencies
 
-- `@tokenring-ai/agent` (^0.1.0): Agent framework
-- `@tokenring-ai/filesystem` (^0.1.0): Filesystem operations
-- `eslint` (^9.39.1): Code linting and fixing
-- `execa` (^9.6.0): Command execution
+- `@tokenring-ai/agent` (^0.2.0): Agent framework
+- `@tokenring-ai/filesystem` (^0.2.0): Filesystem operations
+- `eslint` (^9.39.2): Code linting and fixing
+- `execa` (^9.6.1): Command execution
 - `jiti` (^2.6.1): Runtime transpilation
 - `jscodeshift` (^17.3.0): Code transformation utilities
 - `zod`: Schema validation
@@ -155,7 +155,12 @@ If no supported lockfile is found, an error will be thrown.
 ## Testing
 
 ```bash
-npm test
+bun run test
+```
+
+```bash
+bun run test:watch  # Watch mode
+bun run test:coverage  # Coverage report
 ```
 
 ## License
