@@ -2,7 +2,7 @@ import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
-import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
+import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
 import {z} from "zod";
 
 // Exported tool name following the required pattern
@@ -29,9 +29,9 @@ async function execute(
   }
 
   // Detect package manager and run appropriate command
-  if (await filesystem.exists("pnpm-lock.yaml")) {
+  if (await filesystem.exists("pnpm-lock.yaml", agent)) {
     agent.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
-    return await runShellCommand(
+    return await bash(
       {
         command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
       },
@@ -39,9 +39,9 @@ async function execute(
     );
   }
 
-  if (await filesystem.exists("yarn.lock")) {
+  if (await filesystem.exists("yarn.lock", agent)) {
     agent.infoLine(`[${name}] Detected yarn, installing ${packageName}`);
-    return await runShellCommand(
+    return await bash(
       {
         command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
       },
@@ -49,9 +49,9 @@ async function execute(
     );
   }
 
-  if (await filesystem.exists("package-lock.json")) {
+  if (await filesystem.exists("package-lock.json", agent)) {
     agent.infoLine(`[${name}] Detected npm, installing ${packageName}`);
-    return await runShellCommand(
+    return await bash(
       {
         command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,
       },

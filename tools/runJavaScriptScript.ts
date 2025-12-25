@@ -44,7 +44,7 @@ async function execute(
 
   try {
     // Write the script to a temporary file
-    await filesystem.writeFile(tempFileName, script);
+    await filesystem.writeFile(tempFileName, script, agent);
 
     timeoutSeconds = Math.max(5, Math.min(timeoutSeconds || 30, 300));
 
@@ -54,7 +54,7 @@ async function execute(
 
     const {ok, stdout, stderr, exitCode, error} = await filesystem.executeCommand(["node", tempFileName], {
       timeoutSeconds: timeoutSeconds,
-    });
+    }, agent);
 
     return {
       ok: true,
@@ -64,7 +64,7 @@ async function execute(
       format,
     };
   } finally {
-    await filesystem.deleteFile(tempFileName);
+    await filesystem.deleteFile(tempFileName, agent);
   }
 }
 

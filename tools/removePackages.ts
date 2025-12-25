@@ -2,7 +2,7 @@ import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
-import {execute as runShellCommand} from "@tokenring-ai/filesystem/tools/runShellCommand";
+import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
 import {z} from "zod";
 
 const name = "javascript_removePackages";
@@ -27,8 +27,8 @@ async function execute(
   }
 
   // Determine which lockfile exists to infer the package manager
-  if (await filesystem.exists("pnpm-lock.yaml")) {
-    return await runShellCommand(
+  if (await filesystem.exists("pnpm-lock.yaml", agent)) {
+    return await bash(
       {
         command: `pnpm remove ${packageName}`,
       },
@@ -36,8 +36,8 @@ async function execute(
     );
   }
 
-  if (await filesystem.exists("yarn.lock")) {
-    return await runShellCommand(
+  if (await filesystem.exists("yarn.lock", agent)) {
+    return await bash(
       {
         command: `yarn remove ${packageName}`,
       },
@@ -45,8 +45,8 @@ async function execute(
     );
   }
 
-  if (await filesystem.exists("package-lock.json")) {
-    return await runShellCommand(
+  if (await filesystem.exists("package-lock.json", agent)) {
+    return await bash(
       {
         command: `npm uninstall ${packageName}`,
       },

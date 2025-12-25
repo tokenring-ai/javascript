@@ -26,7 +26,7 @@ async function execute(
     for (const file of filesArr) {
       try {
         // Read source file
-        const source = await filesystem.readFile(file, "utf8");
+        const source = await filesystem.readFile(file, "utf8", agent);
 
         // Run ESLint fix
         const lintResults = await eslint.lintText(source, {filePath: file});
@@ -34,10 +34,9 @@ async function execute(
 
         if (result.output && result.output !== source) {
           // Write fixed code back to file
-          await filesystem.writeFile(file, result.output);
+          await filesystem.writeFile(file, result.output, agent);
           results.push({file: file, output: "Successfully fixed"});
           agent.infoLine(`[${name}] Applied ESLint fixes on ${file}`);
-          filesystem.setDirty(true);
         } else {
           results.push({file: file, output: "No changes needed"});
           agent.infoLine(`[${name}] No changes needed for ${file}`);
