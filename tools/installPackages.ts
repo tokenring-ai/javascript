@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
