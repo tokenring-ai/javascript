@@ -15,7 +15,7 @@ bun install @tokenring-ai/javascript
 This package registers tools that allow AI agents to:
 
 - Run ESLint with auto-fix on JavaScript/TypeScript files to automatically fix code style issues
-- Install and remove bun packages using detected package managers (pnpm, npm, yarn)
+- Install and remove packages using detected package managers (pnpm, npm, yarn)
 - Execute JavaScript scripts in both ESM and CommonJS formats with timeout controls
 
 ## Package Structure
@@ -23,30 +23,35 @@ This package registers tools that allow AI agents to:
 The package exports a `TokenRingPlugin` that integrates with the TokenRing app framework:
 
 ```typescript
-import TokenRingApp from "@tokenring-ai/app";
-import {ChatService} from "@tokenring-ai/chat";
-import {TokenRingPlugin} from "@tokenring-ai/app";
+import { TokenRingPlugin } from "@tokenring-ai/app";
+import { ChatService } from "@tokenring-ai/chat";
+import { z } from "zod";
+import packageJSON from './package.json' with { type: 'json' };
+import tools from "./tools.ts";
+
+const packageConfigSchema = z.object({});
 
 export default {
-  name: "@tokenring-ai/javascript",
-  version: "0.2.0",
-  description: "TokenRing Coder Javascript Integration",
-  install(app: TokenRingApp) {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
+  install(app, config) {
     app.waitForService(ChatService, chatService =>
-      chatService.addTools("@tokenring-ai/javascript", tools)
+      chatService.addTools(packageJSON.name, tools)
     );
-  }
-} satisfies TokenRingPlugin;
+  },
+  config: packageConfigSchema
+} satisfies TokenRingPlugin<typeof packageConfigSchema>;
 ```
 
 ## Available Tools
 
 ### 1. eslint (`javascript_eslint`)
 
-**Description**: Run ESLint with `--fix` option on JavaScript/TypeScript files to automatically fix code style issues.
+**Description**: Run ESLint with --fix option on JavaScript/TypeScript files in the codebase to automatically fix code style issues.
 
 **Parameters**:
-- `files` (string[]): Array of file paths to apply ESLint fixes to
+- `files` (string[]): List of JavaScript/TypeScript file paths to apply ESLint fixes to.
 
 **Returns**: Array of `{ file: string; output?: string; error?: string }` objects
 
@@ -67,10 +72,10 @@ results.forEach(result => {
 
 ### 2. installPackages (`javascript_installPackages`)
 
-**Description**: Install packages using the detected package manager (npm, yarn, or pnpm)
+**Description**: Installs a package using the detected package manager (pnpm, npm, yarn).
 
 **Parameters**:
-- `packageName` (string): Package name(s) to install (space-separated for multiple packages)
+- `packageName` (string): One or more package names to install, separated by spaces.
 - `isDev` (boolean, optional): Install as dev dependency (default: false)
 
 **Returns**: Command execution result with stdout, stderr, and exit code
@@ -89,10 +94,10 @@ if (result.ok) {
 
 ### 3. removePackages (`javascript_removePackages`)
 
-**Description**: Remove packages using the detected package manager
+**Description**: Removes a package using the detected package manager (pnpm, npm, yarn).
 
 **Parameters**:
-- `packageName` (string): Package name(s) to remove (space-separated for multiple packages)
+- `packageName` (string): One or more package names to remove, separated by spaces.
 
 **Returns**: Command execution result with stdout, stderr, and exit code
 
@@ -109,14 +114,14 @@ if (result.ok) {
 
 ### 4. runJavaScriptScript (`javascript_runJavaScriptScript`)
 
-**Description**: Execute JavaScript code in a temporary file using Node.js with timeout control
+**Description**: Run a JavaScript script in the working directory using Node.js. Specify whether the code is in ES module or CommonJS format.
 
 **Parameters**:
-- `script` (string): JavaScript code to execute
-- `format` ('esm' | 'commonjs', optional): Module format (default: 'esm')
-- `timeoutSeconds` (number, optional): Timeout in seconds (default: 30, min: 5, max: 300)
+- `script` (string): The JavaScript code to execute. Code is executed in the root directory of the project.
+- `format` ('esm' | 'commonjs', optional): The module format: 'esm' for ES modules or 'commonjs' for CommonJS (default: 'esm')
+- `timeoutSeconds` (number, optional): Timeout for the script in seconds (default: 30, max: 300, min: 5)
 
-**Returns**: `{ ok: boolean; exitCode?: number; stdout?: string; stderr?: string; format: string }`
+**Returns**: `{ ok: boolean; exitCode?: number; stdout?: string; stderr?: string; format: "esm" | "commonjs" }`
 
 **Example**:
 ```typescript
@@ -142,16 +147,6 @@ The package management tools automatically detect the appropriate package manage
 
 If no supported lockfile is found, an error will be thrown.
 
-## Dependencies
-
-- `@tokenring-ai/agent` (^0.2.0): Agent framework
-- `@tokenring-ai/filesystem` (^0.2.0): Filesystem operations
-- `eslint` (^9.39.2): Code linting and fixing
-- `execa` (^9.6.1): Command execution
-- `jiti` (^2.6.1): Runtime transpilation
-- `jscodeshift` (^17.3.0): Code transformation utilities
-- `zod`: Schema validation
-
 ## Testing
 
 ```bash
@@ -165,4 +160,4 @@ bun run test:coverage  # Coverage report
 
 ## License
 
-MIT License
+MIT License - see [LICENSE](./LICENSE) file for details.
