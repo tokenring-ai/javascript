@@ -26,7 +26,8 @@ async function execute(
     for (const file of filesArr) {
       try {
         // Read source file
-        const source = await filesystem.readFile(file, "utf8", agent);
+        const source = await filesystem.readTextFile(file, agent);
+        if (!source) continue;
 
         // Run ESLint fix
         const lintResults = await eslint.lintText(source, {filePath: file});
