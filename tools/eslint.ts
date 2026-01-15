@@ -37,14 +37,14 @@ async function execute(
           // Write fixed code back to file
           await filesystem.writeFile(file, result.output, agent);
           results.push({file: file, output: "Successfully fixed"});
-          agent.infoLine(`[${name}] Applied ESLint fixes on ${file}`);
+          agent.infoMessage(`[${name}] Applied ESLint fixes on ${file}`);
         } else {
           results.push({file: file, output: "No changes needed"});
-          agent.infoLine(`[${name}] No changes needed for ${file}`);
+          agent.infoMessage(`[${name}] No changes needed for ${file}`);
         }
       } catch (err: any) {
         results.push({file: file, error: err.message});
-        agent.errorLine(`[${name}] ESLint fix on ${file}: ${err.message}`);
+        agent.errorMessage(`[${name}] ESLint fix on ${file}: ${err.message}`);
       }
     }
   } catch (e: any) {

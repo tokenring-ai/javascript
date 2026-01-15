@@ -30,7 +30,7 @@ async function execute(
 
   // Detect package manager and run appropriate command
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
-    agent.infoLine(`[${name}] Detected pnpm, installing ${packageName}`);
+    agent.infoMessage(`[${name}] Detected pnpm, installing ${packageName}`);
     return await bash(
       {
         command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
@@ -40,7 +40,7 @@ async function execute(
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
-    agent.infoLine(`[${name}] Detected yarn, installing ${packageName}`);
+    agent.infoMessage(`[${name}] Detected yarn, installing ${packageName}`);
     return await bash(
       {
         command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
@@ -50,7 +50,7 @@ async function execute(
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
-    agent.infoLine(`[${name}] Detected npm, installing ${packageName}`);
+    agent.infoMessage(`[${name}] Detected npm, installing ${packageName}`);
     return await bash(
       {
         command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,

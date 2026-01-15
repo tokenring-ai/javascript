@@ -48,7 +48,7 @@ async function execute(
 
     timeoutSeconds = Math.max(5, Math.min(timeoutSeconds || 30, 300));
 
-    agent.infoLine(
+    agent.infoMessage(
       `[${name}] Running JavaScript script in ${format} format`,
     );
 
