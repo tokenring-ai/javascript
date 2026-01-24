@@ -6,6 +6,7 @@ import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
 import {z} from "zod";
 
 const name = "javascript_removePackages";
+const displayName = "Javascript/removePackages";
 
 export interface RemovePackagesArgs {
   packageName?: string;
@@ -67,5 +68,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

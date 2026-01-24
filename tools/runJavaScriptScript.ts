@@ -5,6 +5,7 @@ import {randomBytes} from "crypto";
 import {z} from "zod";
 
 const name = "javascript_runJavaScriptScript";
+const displayName = "Javascript/runJavaScriptScript";
 export interface RunJavaScriptResult {
   ok: boolean;
   exitCode?: number;
@@ -88,5 +89,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

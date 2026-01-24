@@ -5,6 +5,7 @@ import {ESLint} from "eslint";
 import {z} from "zod";
 
 const name = "javascript_eslint";
+const displayName = "Javascript/eslint";
 
 export type EslintResult = { file: string; output?: string; error?: string };
 
@@ -64,5 +65,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

@@ -7,6 +7,7 @@ import {z} from "zod";
 
 // Exported tool name following the required pattern
 const name = "javascript_installPackages";
+const displayName = "Javascript/installPackages";
 
 export interface InstallPackagesArgs {
   packageName?: string;
@@ -75,5 +76,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;
