@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
@@ -17,9 +17,9 @@ export interface RemovePackagesArgs {
  * Returns raw command output without tool name prefix.
  */
 async function execute(
-  {packageName}: z.infer<typeof inputSchema>,
+  {packageName}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<ExecuteCommandResult> {
+): Promise<TokenRingToolJSONResult<ExecuteCommandResult>> {
   const filesystem = agent.requireServiceByType(FileSystemService);
 
   // Validate input
@@ -29,30 +29,42 @@ async function execute(
 
   // Determine which lockfile exists to infer the package manager
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
-    return await bash(
+    const result = await bash(
       {
         command: `pnpm remove ${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
-    return await bash(
+    const result = await bash(
       {
         command: `yarn remove ${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
-    return await bash(
+    const result = await bash(
       {
         command: `npm uninstall ${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   // No lockfile detected – cannot determine package manager

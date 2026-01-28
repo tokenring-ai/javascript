@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
@@ -20,9 +20,9 @@ export interface InstallPackagesArgs {
  * Errors are thrown as exceptions rather than returned.
  */
 async function execute(
-  {isDev = false, packageName}: z.infer<typeof inputSchema>,
+  {isDev = false, packageName}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<ExecuteCommandResult> {
+): Promise<TokenRingToolJSONResult<ExecuteCommandResult>> {
   const filesystem = agent.requireServiceByType(FileSystemService);
 
   if (!packageName) {
@@ -32,32 +32,44 @@ async function execute(
   // Detect package manager and run appropriate command
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
     agent.infoMessage(`[${name}] Detected pnpm, installing ${packageName}`);
-    return await bash(
+    const result = await bash(
       {
         command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
     agent.infoMessage(`[${name}] Detected yarn, installing ${packageName}`);
-    return await bash(
+    const result = await bash(
       {
         command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
     agent.infoMessage(`[${name}] Detected npm, installing ${packageName}`);
-    return await bash(
+    const result = await bash(
       {
         command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,
       },
       agent,
     );
+    return {
+      type: "json",
+      data: result.data
+    };
   }
 
   // No lock file found – cannot determine package manager

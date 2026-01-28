@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {randomBytes} from "crypto";
 import {z} from "zod";
@@ -22,9 +22,9 @@ async function execute(
     script,
     format = "esm",
     timeoutSeconds = 30,
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<RunJavaScriptResult> {
+): Promise<TokenRingToolJSONResult<RunJavaScriptResult>> {
   const filesystem = agent.requireServiceByType(FileSystemService);
 
   if (!script) {
@@ -58,11 +58,14 @@ async function execute(
     }, agent);
 
     return {
-      ok: true,
-      exitCode: exitCode,
-      stdout: stdout?.trim() || "",
-      stderr: stderr?.trim() || "",
-      format,
+      type: "json",
+      data: {
+        ok: true,
+        exitCode: exitCode,
+        stdout: stdout?.trim() || "",
+        stderr: stderr?.trim() || "",
+        format,
+      }
     };
   } finally {
     await filesystem.deleteFile(tempFileName, agent);

@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {ESLint} from "eslint";
 import {z} from "zod";
@@ -10,9 +10,9 @@ const displayName = "Javascript/eslint";
 export type EslintResult = { file: string; output?: string; error?: string };
 
 async function execute(
-  {files}: z.infer<typeof inputSchema>,
+  {files}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<EslintResult[]> {
+): Promise<TokenRingToolJSONResult<EslintResult[]>> {
 
   const filesystem = agent.requireServiceByType(FileSystemService);
 
@@ -51,7 +51,10 @@ async function execute(
   } catch (e: any) {
     throw new Error(`[${name}] Failed to run ESLint: ${e.message}`);
   }
-  return results;
+  return {
+    type: "json",
+    data: results
+  };
 }
 
 const description =
