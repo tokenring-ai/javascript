@@ -1,90 +1,65 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
-import {ExecuteCommandResult} from "@tokenring-ai/filesystem/FileSystemProvider";
-import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
-import {execute as bash} from "@tokenring-ai/filesystem/tools/bash";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {FileSystemService} from "@tokenring-ai/filesystem";
+import {TerminalService} from "@tokenring-ai/terminal";
 import {z} from "zod";
 
-// Exported tool name following the required pattern
 const name = "javascript_installPackages";
 const displayName = "Javascript/installPackages";
 
-export interface InstallPackagesArgs {
-  packageName?: string;
-  isDev?: boolean;
-}
-
 /**
- * Install a package using the detected package manager.
- * All agent output is prefixed with `[${name}]`.
- * Errors are thrown as exceptions rather than returned.
+ * Executes the package installation using the detected package manager.
+ * Returns raw command output without tool name prefix.
  */
 async function execute(
-  {isDev = false, packageName}: z.output<typeof inputSchema>,
+  {packageName}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<ExecuteCommandResult>> {
+): Promise<string> {
+  const terminal = agent.requireServiceByType(TerminalService);
   const filesystem = agent.requireServiceByType(FileSystemService);
 
-  if (!packageName) {
-    throw new Error(`[${name}] packageName is required`);
+  // Validate input
+  if (!packageName || packageName.trim() === "") {
+    throw new Error(`[${name}] package name must be provided.`);
   }
 
-  // Detect package manager and run appropriate command
+  // Determine which lockfile exists to infer the package manager
+  if (await filesystem.exists("bun.lock", agent)) {
+    const result = await terminal.executeCommand("bun", ['add', packageName], {}, agent);
+    if (result.ok) return `Package ${packageName} added`;
+
+    return `Package ${packageName} could not be added:\n${result.output}`;
+  }
+
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
-    agent.infoMessage(`[${name}] Detected pnpm, installing ${packageName}`);
-    const result = await bash(
-      {
-        command: `pnpm add ${isDev ? "-D " : ""}${packageName}`,
-      },
-      agent,
-    );
-    return {
-      type: "json",
-      data: result.data
-    };
+    const result = await terminal.executeCommand("pnpm", ['add', packageName], {}, agent);
+    if (result.ok) return `Package ${packageName} added`;
+
+    return `Package ${packageName} could not be added:\n${result.output}`;
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
-    agent.infoMessage(`[${name}] Detected yarn, installing ${packageName}`);
-    const result = await bash(
-      {
-        command: `yarn add ${isDev ? "--dev " : ""}${packageName}`,
-      },
-      agent,
-    );
-    return {
-      type: "json",
-      data: result.data
-    };
+    const result = await terminal.executeCommand("yarn", ['add', packageName], {}, agent);
+    if (result.ok) return `Package ${packageName} added`;
+    return `Package ${packageName} could not be added:\n${result.output}`;
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
-    agent.infoMessage(`[${name}] Detected npm, installing ${packageName}`);
-    const result = await bash(
-      {
-        command: `npm install ${isDev ? "--save-dev " : ""}${packageName}`,
-      },
-      agent,
-    );
-    return {
-      type: "json",
-      data: result.data
-    };
+    const result = await terminal.executeCommand("npm", ['add', packageName], {}, agent);
+    if (result.ok) return `Package ${packageName} added`;
+    return `Package ${packageName} could not be added:\n${result.output}`;
   }
 
-  // No lock file found – cannot determine package manager
-  throw new Error(
-    `[${name}] No supported package manager lock file found (pnpm-lock.yaml, yarn.lock, package-lock.json).`
-  );
+  // No lockfile detected – cannot determine package manager
+  throw new Error(`[${name}] unable to detect package manager (no lockfile found).`);
 }
 
 const description =
-  "Installs a package using the detected package manager (pnpm, npm, yarn)";
+  "Installs a package using the detected package manager (bun, pnpm, npm, yarn)";
 const inputSchema = z.object({
   packageName: z
     .string()
     .describe("One or more package names to install, separated by spaces."),
-  isDev: z.boolean().default(false).describe("Install as dev dependency"),
 });
 
 export default {

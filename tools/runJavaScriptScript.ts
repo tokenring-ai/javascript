@@ -1,6 +1,7 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+import {TerminalService} from "@tokenring-ai/terminal";
 import {randomBytes} from "crypto";
 import {z} from "zod";
 
@@ -25,6 +26,7 @@ async function execute(
   }: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolJSONResult<RunJavaScriptResult>> {
+  const terminal = agent.requireServiceByType(TerminalService);
   const filesystem = agent.requireServiceByType(FileSystemService);
 
   if (!script) {
@@ -53,7 +55,7 @@ async function execute(
       `[${name}] Running JavaScript script in ${format} format`,
     );
 
-    const {ok, stdout, stderr, exitCode, error} = await filesystem.executeCommand(["node", tempFileName], {
+    const {ok, stdout, stderr, exitCode, error} = await terminal.executeCommand("node", [tempFileName], {
       timeoutSeconds: timeoutSeconds,
     }, agent);
 
