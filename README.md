@@ -15,7 +15,7 @@ bun install @tokenring-ai/javascript
 This package registers tools that allow AI agents to:
 
 - Run ESLint with auto-fix on JavaScript/TypeScript files in the codebase to automatically fix code style issues
-- Install and remove packages using detected package managers (pnpm, npm, yarn)
+- Install and remove packages using detected package managers (bun, pnpm, npm, yarn)
 - Execute JavaScript scripts in both ESM and CommonJS formats with timeout controls
 
 ## Package Structure
@@ -79,19 +79,20 @@ for (const result of results) {
 
 **Tool Name**: `javascript_installPackages`
 
-**Description**: Installs a package using the detected package manager (pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
+**Description**: Installs a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
 
 **Parameters**:
 - `packageName` (string): One or more package names to install, separated by spaces.
-- `isDev` (boolean, optional): Install as dev dependency (default: false).
 
 **Returns**: `{ ok: boolean; stdout?: string; stderr?: string }`
+- `ok`: True if installation succeeded
+- `stdout`: Command output if successful
+- `stderr`: Error output if failed
 
 **Example**:
 ```typescript
 const result = await agent.executeTool('javascript_installPackages', {
-  packageName: 'lodash',
-  isDev: false
+  packageName: 'lodash'
 });
 
 if (result.ok) {
@@ -106,12 +107,15 @@ if (result.ok) {
 
 **Tool Name**: `javascript_removePackages`
 
-**Description**: Removes a package using the detected package manager (pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
+**Description**: Removes a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
 
 **Parameters**:
 - `packageName` (string): One or more package names to remove, separated by spaces.
 
 **Returns**: `{ ok: boolean; stdout?: string; stderr?: string }`
+- `ok`: True if removal succeeded
+- `stdout`: Command output if successful
+- `stderr`: Error output if failed
 
 **Example**:
 ```typescript
@@ -176,6 +180,8 @@ const cjsResult = await agent.executeTool('javascript_runJavaScriptScript', {
 ## Package Manager Detection
 
 The package management tools automatically detect the appropriate package manager based on lockfile presence:
+
+- `bun.lock` → bun
 - `pnpm-lock.yaml` → pnpm
 - `yarn.lock` → yarn
 - `package-lock.json` → npm
@@ -215,16 +221,19 @@ bun run test:coverage  # Coverage report
 ## Dependencies
 
 This package depends on:
+
 - `eslint`: For code linting and fixing
 - `execa`: For node command execution
-- `jiti`: For JavaScript package execution
-- `jscodeshift`: For AST-based transformations
+- `jiti`: For TypeScript execution
+- `jscodeshift`: For code transformation
 
 The package also depends on core TokenRing packages:
+
 - `@tokenring-ai/app`: Plugin framework
 - `@tokenring-ai/chat`: Chat service integration
 - `@tokenring-ai/agent`: Agent system
 - `@tokenring-ai/filesystem`: File operations and command execution
+- `@tokenring-ai/terminal`: Terminal service for command execution
 
 ## License
 
