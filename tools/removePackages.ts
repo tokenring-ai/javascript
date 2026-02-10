@@ -26,28 +26,30 @@ async function execute(
   // Determine which lockfile exists to infer the package manager
   if (await filesystem.exists("bun.lock", agent)) {
     const result = await terminal.executeCommand("bun", ['remove', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} removed`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be removed:\n${output}`;
   }
 
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
     const result = await terminal.executeCommand("pnpm", ['remove', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} removed`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be removed:\n${output}`;
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
     const result = await terminal.executeCommand("yarn", ['remove', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} removed`;
-    return `Package ${packageName} could not be removed:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} removed`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be removed:\n${output}`;
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
     const result = await terminal.executeCommand("npm", ['remove', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} removed`;
-    return `Package ${packageName} could not be removed:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} removed`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be removed:\n${output}`;
   }
 
   // No lockfile detected – cannot determine package manager

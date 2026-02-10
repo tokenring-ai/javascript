@@ -10,8 +10,7 @@ const displayName = "Javascript/runJavaScriptScript";
 export interface RunJavaScriptResult {
   ok: boolean;
   exitCode?: number;
-  stdout?: string;
-  stderr?: string;
+  output: string;
   format: "esm" | "commonjs";
 }
 
@@ -55,17 +54,16 @@ async function execute(
       `[${name}] Running JavaScript script in ${format} format`,
     );
 
-    const {ok, stdout, stderr, exitCode, error} = await terminal.executeCommand("node", [tempFileName], {
+    const result = await terminal.executeCommand("node", [tempFileName], {
       timeoutSeconds: timeoutSeconds,
     }, agent);
 
     return {
       type: "json",
       data: {
-        ok: true,
-        exitCode: exitCode,
-        stdout: stdout?.trim() || "",
-        stderr: stderr?.trim() || "",
+        ok: result.status === "success",
+        output: result.status === "success" || result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout",
+        exitCode: result.status === "badExitCode" ? result.exitCode : 0,
         format,
       }
     };

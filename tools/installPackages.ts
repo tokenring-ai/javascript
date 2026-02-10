@@ -26,28 +26,30 @@ async function execute(
   // Determine which lockfile exists to infer the package manager
   if (await filesystem.exists("bun.lock", agent)) {
     const result = await terminal.executeCommand("bun", ['add', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} added`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be added:\n${output}`;
   }
 
   if (await filesystem.exists("pnpm-lock.yaml", agent)) {
     const result = await terminal.executeCommand("pnpm", ['add', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} added`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be added:\n${output}`;
   }
 
   if (await filesystem.exists("yarn.lock", agent)) {
     const result = await terminal.executeCommand("yarn", ['add', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} added`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be added:\n${output}`;
   }
 
   if (await filesystem.exists("package-lock.json", agent)) {
     const result = await terminal.executeCommand("npm", ['add', packageName], {}, agent);
-    if (result.ok) return `Package ${packageName} added`;
-    return `Package ${packageName} could not be added:\n${result.output}`;
+    if (result.status === "success") return `Package ${packageName} added`;
+    const output = result.status === "badExitCode" ? result.output : result.status === "unknownError" ? result.error : "Timeout";
+    return `Package ${packageName} could not be added:\n${output}`;
   }
 
   // No lockfile detected – cannot determine package manager
