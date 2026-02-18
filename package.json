@@ -9,7 +9,7 @@
     "@tokenring-ai/agent": "0.2.0",
     "@tokenring-ai/filesystem": "0.2.0",
     "@tokenring-ai/terminal": "0.2.0",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.0",
     "execa": "^9.6.1",
     "jiti": "^2.6.1",
     "jscodeshift": "^17.3.0"
