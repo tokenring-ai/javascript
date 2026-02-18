@@ -79,15 +79,13 @@ for (const result of results) {
 
 **Tool Name**: `javascript_installPackages`
 
-**Description**: Installs a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
+**Description**: Installs a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence. Returns raw command output without tool name prefix.
 
 **Parameters**:
 - `packageName` (string): One or more package names to install, separated by spaces.
 
-**Returns**: `{ ok: boolean; stdout?: string; stderr?: string }`
-- `ok`: True if installation succeeded
-- `stdout`: Command output if successful
-- `stderr`: Error output if failed
+**Returns**: `string`
+- Returns the raw output from the package manager command
 
 **Example**:
 ```typescript
@@ -95,11 +93,10 @@ const result = await agent.executeTool('javascript_installPackages', {
   packageName: 'lodash'
 });
 
-if (result.ok) {
+if (result.includes('added')) {
   agent.infoMessage('Package installed successfully');
-  agent.infoMessage(result.stdout);
-} else if (result.stderr) {
-  agent.errorMessage(result.stderr);
+} else if (result.includes('could not be added')) {
+  agent.errorMessage(result);
 }
 ```
 
@@ -107,15 +104,13 @@ if (result.ok) {
 
 **Tool Name**: `javascript_removePackages`
 
-**Description**: Removes a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence.
+**Description**: Removes a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence. Returns raw command output without tool name prefix.
 
 **Parameters**:
 - `packageName` (string): One or more package names to remove, separated by spaces.
 
-**Returns**: `{ ok: boolean; stdout?: string; stderr?: string }`
-- `ok`: True if removal succeeded
-- `stdout`: Command output if successful
-- `stderr`: Error output if failed
+**Returns**: `string`
+- Returns the raw output from the package manager command
 
 **Example**:
 ```typescript
@@ -123,11 +118,10 @@ const result = await agent.executeTool('javascript_removePackages', {
   packageName: 'lodash'
 });
 
-if (result.ok) {
+if (result.includes('removed')) {
   agent.infoMessage('Package removed successfully');
-  agent.infoMessage(result.stdout);
-} else if (result.stderr) {
-  agent.errorMessage(result.stderr);
+} else if (result.includes('could not be removed')) {
+  agent.errorMessage(result);
 }
 ```
 
@@ -147,8 +141,7 @@ if (result.ok) {
 {
   ok: boolean;
   exitCode?: number;
-  stdout?: string;
-  stderr?: string;
+  output: string;
   format: "esm" | "commonjs";
 }
 ```
@@ -163,10 +156,10 @@ const result = await agent.executeTool('javascript_runJavaScriptScript', {
 
 if (result.ok) {
   agent.infoMessage(`Exit code: ${result.exitCode}`);
-  agent.infoMessage(`Output: ${result.stdout}`);
+  agent.infoMessage(`Output: ${result.output}`);
   agent.infoMessage(`Format: ${result.format}`);
 } else {
-  agent.errorMessage(`Error: ${result.stderr}`);
+  agent.errorMessage(`Error: ${result.output}`);
 }
 
 // CommonJS example
