@@ -1,19 +1,23 @@
 import {TokenRingPlugin} from "@tokenring-ai/app";
-import {ChatService} from "@tokenring-ai/chat";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {z} from "zod";
+import JavascriptFileValidator from "./JavascriptFileValidator.ts";
 import packageJSON from './package.json' with {type: 'json'};
-import tools from "./tools.ts";
 
 const packageConfigSchema = z.object({});
+
+const JS_EXTENSIONS = [".js", ".mjs", ".cjs", ".jsx"];
 
 export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    app.waitForService(ChatService, chatService =>
-      chatService.addTools(tools)
-    );
+    app.waitForService(FileSystemService, fileSystemService => {
+      for (const ext of JS_EXTENSIONS) {
+        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
+      }
+    });
   },
   config: packageConfigSchema
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
