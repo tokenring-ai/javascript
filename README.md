@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `@tokenring-ai/javascript` package provides JavaScript/TypeScript development tools for the TokenRing AI ecosystem. This package integrates with TokenRing agents to enable code linting, package management, and script execution capabilities. It serves as a plugin for TokenRing AI agents, providing specialized tools for JavaScript development workflows.
+The `@tokenring-ai/javascript` package provides JavaScript file validation capabilities for the TokenRing AI ecosystem. This package integrates with the TokenRing FileSystemService to register ESLint-based validation for JavaScript files, ensuring code quality and consistency across JavaScript/TypeScript projects.
 
 ## Installation
 
@@ -12,22 +12,32 @@ bun install @tokenring-ai/javascript
 
 ## Package Purpose
 
-This package registers tools that allow AI agents to:
+This package registers a file validator that automatically validates JavaScript files using ESLint. When integrated with a TokenRing application, it enables:
 
-- Run ESLint with auto-fix on JavaScript/TypeScript files in the codebase to automatically fix code style issues
-- Install and remove packages using detected package managers (bun, pnpm, npm, yarn)
-- Execute JavaScript scripts in both ESM and CommonJS formats with timeout controls
+- Automatic ESLint validation for JavaScript files (.js, .mjs, .cjs, .jsx)
+- Integration with the FileSystemService for seamless file validation
+- Error and warning reporting with line/column information
+- Support for both errors and warnings in validation results
 
 ## Package Structure
+
+The package consists of the following components:
+
+### Core Files
+
+- **`JavascriptFileValidator.ts`**: The main file validator implementation using ESLint
+- **`plugin.ts`**: TokenRing plugin that registers the validator with FileSystemService
+- **`index.ts`**: Package entry point (currently empty, exports via plugin.ts)
+
+### Plugin Export
 
 The package exports a `TokenRingPlugin` that integrates with the TokenRing app framework:
 
 ```typescript
 import {TokenRingPlugin} from "@tokenring-ai/app";
-import {ChatService} from "@tokenring-ai/chat";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {z} from "zod";
 import packageJSON from './package.json' with {type: 'json'};
-import tools from "./tools.ts";
 
 const packageConfigSchema = z.object({});
 
@@ -36,197 +46,206 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    app.waitForService(ChatService, chatService =>
-      chatService.addTools(tools)
-    );
+    app.waitForService(FileSystemService, fileSystemService => {
+      for (const ext of [".js", ".mjs", ".cjs", ".jsx"]) {
+        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
+      }
+    });
   },
   config: packageConfigSchema
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
 ```
 
-## Available Tools
+## Core Components
 
-### 1. eslint
+### JavascriptFileValidator
 
-**Tool Name**: `javascript_eslint`
+The `JavascriptFileValidator` is a file validator implementation that uses ESLint to validate JavaScript files.
 
-**Description**: Run ESLint with auto-fix on JavaScript/TypeScript files. Reads files, applies ESLint fixes in memory, and writes corrected code back to files.
-
-**Parameters**:
-- `files` (string[]): List of JavaScript/TypeScript file paths to apply ESLint fixes to.
-
-**Returns**: Array of `{ file: string; output?: string; error?: string }` objects
-- `file`: Path of the file processed
-- `output`: "Successfully fixed" or "No changes needed"
-- `error`: Error message if fix failed
-
-**Example**:
+**Type Signature:**
 ```typescript
-const results = await agent.executeTool('javascript_eslint', {
-  files: ['src/main.ts', 'utils/helper.js']
-});
-
-for (const result of results) {
-  if (result.output) {
-    agent.infoMessage(`[${result.file}]: ${result.output}`);
-  } else if (result.error) {
-    agent.errorMessage(`[${result.file}]: ${result.error}`);
-  }
-}
+type FileValidator = (filePath: string, content: string) => Promise<string | null>;
 ```
 
-### 2. installPackages
+**Implementation Details:**
 
-**Tool Name**: `javascript_installPackages`
+- Uses ESLint to analyze JavaScript code
+- Returns `null` if no issues are found
+- Returns a formatted string with all issues if validation fails
+- Each issue includes line, column, severity, message, and rule ID
 
-**Description**: Installs a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence. Returns raw command output without tool name prefix.
-
-**Parameters**:
-- `packageName` (string): One or more package names to install, separated by spaces.
-
-**Returns**: `string`
-- Returns the raw output from the package manager command
-
-**Example**:
-```typescript
-const result = await agent.executeTool('javascript_installPackages', {
-  packageName: 'lodash'
-});
-
-if (result.includes('added')) {
-  agent.infoMessage('Package installed successfully');
-} else if (result.includes('could not be added')) {
-  agent.errorMessage(result);
-}
+**Validation Output Format:**
+```
+line:column severity message (ruleId)
+line:column severity message (ruleId)
+...
 ```
 
-### 3. removePackages
-
-**Tool Name**: `javascript_removePackages`
-
-**Description**: Removes a package using the detected package manager (bun, pnpm, npm, yarn). Automatically detects package manager from lockfile presence. Returns raw command output without tool name prefix.
-
-**Parameters**:
-- `packageName` (string): One or more package names to remove, separated by spaces.
-
-**Returns**: `string`
-- Returns the raw output from the package manager command
-
-**Example**:
-```typescript
-const result = await agent.executeTool('javascript_removePackages', {
-  packageName: 'lodash'
-});
-
-if (result.includes('removed')) {
-  agent.infoMessage('Package removed successfully');
-} else if (result.includes('could not be removed')) {
-  agent.errorMessage(result);
-}
+**Example Output:**
+```
+5:3 warning 'x' is assigned a value but never used (@typescript-eslint/no-unused-vars)
+10:1 error Missing semicolon (semi)
 ```
 
-### 4. runJavaScriptScript
+## Usage
 
-**Tool Name**: `javascript_runJavaScriptScript`
+### Basic Integration
 
-**Description**: Run a JavaScript script in the working directory using Node.js. Creates temporary files (.mjs for ESM, .cjs for CommonJS) and executes them. Specify whether the code is in ES module or CommonJS format.
+To use this package in your TokenRing application:
 
-**Parameters**:
-- `script` (string): The JavaScript code to execute. Code is executed in the root directory of the project.
-- `format` ('esm' | 'commonjs', optional): The module format: 'esm' for ES modules or 'commonjs' for CommonJS (default: 'esm').
-- `timeoutSeconds` (number, optional): Timeout for the script in seconds (default: 30, range: 5-300).
-
-**Returns**:
 ```typescript
-{
-  ok: boolean;
-  exitCode?: number;
-  output: string;
-  format: "esm" | "commonjs";
-}
+import {TokenRingApp} from "@tokenring-ai/app";
+import javascriptPlugin from "@tokenring-ai/javascript/plugin";
+
+const app = new TokenRingApp();
+
+// Install the JavaScript validation plugin
+await app.installPlugin(javascriptPlugin);
+
+// Now all JavaScript files will be automatically validated
 ```
 
-**Example**:
-```typescript
-const result = await agent.executeTool('javascript_runJavaScriptScript', {
-  script: 'console.log("Hello from JavaScript!"); console.log(2 + 2);',
-  format: 'esm',
-  timeoutSeconds: 10
-});
+### File Validation Example
 
-if (result.ok) {
-  agent.infoMessage(`Exit code: ${result.exitCode}`);
-  agent.infoMessage(`Output: ${result.output}`);
-  agent.infoMessage(`Format: ${result.format}`);
+When a JavaScript file is validated through the FileSystemService:
+
+```typescript
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+
+// Get the file service (assuming it's registered)
+const fileService = await app.getService(FileSystemService);
+
+// Validate a JavaScript file
+const validationResult = await fileService.validateFile("src/example.js", "const x = 1;");
+
+if (validationResult === null) {
+  console.log("File is valid");
 } else {
-  agent.errorMessage(`Error: ${result.output}`);
+  console.log("Validation issues:");
+  console.log(validationResult);
 }
+```
 
-// CommonJS example
-const cjsResult = await agent.executeTool('javascript_runJavaScriptScript', {
-  script: 'const sum = (a, b) => a + b; console.log(sum(1, 2));',
-  format: 'commonjs',
-  timeoutSeconds: 30
+## Supported File Extensions
+
+The package registers validators for the following JavaScript file extensions:
+
+- `.js` - Standard JavaScript files
+- `.mjs` - ES Module files
+- `.cjs` - CommonJS files
+- `.jsx` - JavaScript JSX files
+
+## Configuration
+
+The package currently has no configuration options. The `packageConfigSchema` is an empty object:
+
+```typescript
+const packageConfigSchema = z.object({});
+```
+
+## Integration
+
+### With FileSystemService
+
+The package integrates with the `@tokenring-ai/filesystem` package by registering file validators:
+
+```typescript
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+
+app.waitForService(FileSystemService, fileSystemService => {
+  // Register validators for all JavaScript extensions
+  fileSystemService.registerFileValidator(".js", JavascriptFileValidator);
+  fileSystemService.registerFileValidator(".mjs", JavascriptFileValidator);
+  fileSystemService.registerFileValidator(".cjs", JavascriptFileValidator);
+  fileSystemService.registerFileValidator(".jsx", JavascriptFileValidator);
 });
 ```
 
-## Package Manager Detection
+### With TokenRingApp
 
-The package management tools automatically detect the appropriate package manager based on lockfile presence:
-
-- `bun.lock` → bun
-- `pnpm-lock.yaml` → pnpm
-- `yarn.lock` → yarn
-- `package-lock.json` → npm
-
-If no supported lockfile is found, an error will be thrown with a descriptive message.
-
-## Error Handling
-
-All tools prefix their output and errors with `[toolName]` for consistent logging:
+Install the plugin during application setup:
 
 ```typescript
-// Error handling example
-try {
-  const result = await agent.executeTool('javascript_installPackages', {
-    packageName: 'nonexistent-package'
+import {TokenRingApp} from "@tokenring-ai/app";
+import javascriptPlugin from "@tokenring-ai/javascript/plugin";
+
+const app = new TokenRingApp();
+await app.installPlugin(javascriptPlugin);
+```
+
+## Best Practices
+
+### ESLint Configuration
+
+This package uses ESLint with the project's existing ESLint configuration. Ensure you have:
+
+1. A valid `.eslintrc` or `eslint.config.js` file in your project
+2. All necessary ESLint plugins installed
+3. Proper TypeScript support if validating TypeScript files
+
+### Validation Performance
+
+- The ESLint instance is created once and reused for all validations
+- Validation is asynchronous to avoid blocking the event loop
+- Consider caching validation results for frequently accessed files
+
+### Error Handling
+
+When validation returns issues:
+
+```typescript
+const result = await fileService.validateFile("src/example.js", code);
+
+if (result) {
+  // Parse the validation result
+  const issues = result.split('\n').map(line => {
+    const [location, severity, ...messageParts] = line.split(' ');
+    const [lineNum, column] = location.split(':');
+    return {
+      line: parseInt(lineNum),
+      column: parseInt(column),
+      severity,
+      message: messageParts.join(' ')
+    };
   });
-} catch (error) {
-  // Error will include prefix from tool name
-  agent.errorMessage(`Failed: ${error}`);
+  
+  console.log(`Found ${issues.length} issues`);
 }
 ```
 
 ## Testing
 
+Run the test suite with:
+
 ```bash
 bun run test
 ```
 
-```bash
-bun run test:watch  # Watch mode
-```
+Watch mode for development:
 
 ```bash
-bun run test:coverage  # Coverage report
+bun run test:watch
+```
+
+Generate coverage report:
+
+```bash
+bun run test:coverage
 ```
 
 ## Dependencies
 
-This package depends on:
+### Runtime Dependencies
 
-- `eslint`: For code linting and fixing
-- `execa`: For node command execution
-- `jiti`: For TypeScript execution
-- `jscodeshift`: For code transformation
+- **`@tokenring-ai/app`** (0.2.0): Plugin framework and application core
+- **`@tokenring-ai/filesystem`** (0.2.0): FileSystemService for file validation
+- **`eslint`** (^10.0.2): JavaScript linting engine
+- **`zod`** (^4.3.6): Schema validation
 
-The package also depends on core TokenRing packages:
+### Development Dependencies
 
-- `@tokenring-ai/app`: Plugin framework
-- `@tokenring-ai/chat`: Chat service integration
-- `@tokenring-ai/agent`: Agent system
-- `@tokenring-ai/filesystem`: File operations and command execution
-- `@tokenring-ai/terminal`: Terminal service for command execution
+- **`typescript`** (^5.9.3): TypeScript compiler
+- **`vitest`** (^4.0.18): Testing framework
 
 ## License
 
