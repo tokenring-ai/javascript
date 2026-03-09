@@ -4,6 +4,19 @@
 
 The `@tokenring-ai/javascript` package provides JavaScript file validation capabilities for the TokenRing AI ecosystem. This package integrates with the TokenRing FileSystemService to register ESLint-based validation for JavaScript files, ensuring code quality and consistency across JavaScript/TypeScript projects.
 
+### Key Features
+
+- Automatic ESLint validation for JavaScript files (.js, .mjs, .cjs, .jsx)
+- Integration with the FileSystemService for seamless file validation
+- Error and warning reporting with line/column information
+- Support for both errors and warnings in validation results
+- Reusable ESLint instance for performance optimization
+
+### Integration Points
+
+- **@tokenring-ai/app**: Plugin framework integration
+- **@tokenring-ai/filesystem**: FileSystemService for file validation
+
 ## Installation
 
 ```bash
@@ -56,7 +69,7 @@ export default {
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
 ```
 
-## Core Components
+## Core Components/API
 
 ### JavascriptFileValidator
 
@@ -87,7 +100,30 @@ line:column severity message (ruleId)
 10:1 error Missing semicolon (semi)
 ```
 
-## Usage
+### Plugin
+
+The package exports a default `TokenRingPlugin` that registers the JavaScript file validators with the FileSystemService.
+
+**Plugin Configuration:**
+
+```typescript
+const packageConfigSchema = z.object({});
+```
+
+The plugin has no configuration options currently.
+
+**Plugin Interface:**
+```typescript
+{
+  name: string;
+  version: string;
+  description: string;
+  install(app: TokenRingApp, config: {}): void;
+  config: z.ZodObject<{}>;
+}
+```
+
+## Usage Examples
 
 ### Basic Integration
 
@@ -126,14 +162,27 @@ if (validationResult === null) {
 }
 ```
 
-## Supported File Extensions
+### Manual Validator Usage
 
-The package registers validators for the following JavaScript file extensions:
+You can also use the validator directly:
 
-- `.js` - Standard JavaScript files
-- `.mjs` - ES Module files
-- `.cjs` - CommonJS files
-- `.jsx` - JavaScript JSX files
+```typescript
+import JavascriptFileValidator from "@tokenring-ai/javascript/JavascriptFileValidator";
+
+const code = `
+const x = 1;
+const y = 2;
+`;
+
+const result = await JavascriptFileValidator("example.js", code);
+
+if (result) {
+  console.log("Validation issues:");
+  console.log(result);
+} else {
+  console.log("No issues found");
+}
+```
 
 ## Configuration
 
@@ -172,6 +221,15 @@ import javascriptPlugin from "@tokenring-ai/javascript/plugin";
 const app = new TokenRingApp();
 await app.installPlugin(javascriptPlugin);
 ```
+
+## Supported File Extensions
+
+The package registers validators for the following JavaScript file extensions:
+
+- `.js` - Standard JavaScript files
+- `.mjs` - ES Module files
+- `.cjs` - CommonJS files
+- `.jsx` - JavaScript JSX files
 
 ## Best Practices
 

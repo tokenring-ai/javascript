@@ -6,7 +6,7 @@
     "@tokenring-ai/app": "0.2.0",
     "zod": "^4.3.6",
     "@tokenring-ai/filesystem": "0.2.0",
-    "eslint": "^10.0.2"
+    "eslint": "^10.0.3"
   },
   "exports": {
     ".": "./index.ts",
