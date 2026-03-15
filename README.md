@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `@tokenring-ai/javascript` package provides JavaScript file validation capabilities for the TokenRing AI ecosystem. This package integrates with the TokenRing FileSystemService to register ESLint-based validation for JavaScript files, ensuring code quality and consistency across JavaScript/TypeScript projects.
+The `@tokenring-ai/javascript` package provides JavaScript file validation capabilities for the TokenRing AI ecosystem. This package integrates with the TokenRing FileSystemService to register ESLint-based validation for JavaScript files, ensuring code quality and consistency across JavaScript projects.
 
 ### Key Features
 
@@ -23,51 +23,13 @@ The `@tokenring-ai/javascript` package provides JavaScript file validation capab
 bun install @tokenring-ai/javascript
 ```
 
-## Package Purpose
+## Features
 
-This package registers a file validator that automatically validates JavaScript files using ESLint. When integrated with a TokenRing application, it enables:
-
-- Automatic ESLint validation for JavaScript files (.js, .mjs, .cjs, .jsx)
-- Integration with the FileSystemService for seamless file validation
-- Error and warning reporting with line/column information
-- Support for both errors and warnings in validation results
-
-## Package Structure
-
-The package consists of the following components:
-
-### Core Files
-
-- **`JavascriptFileValidator.ts`**: The main file validator implementation using ESLint
-- **`plugin.ts`**: TokenRing plugin that registers the validator with FileSystemService
-- **`index.ts`**: Package entry point (currently empty, exports via plugin.ts)
-
-### Plugin Export
-
-The package exports a `TokenRingPlugin` that integrates with the TokenRing app framework:
-
-```typescript
-import {TokenRingPlugin} from "@tokenring-ai/app";
-import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
-import {z} from "zod";
-import packageJSON from './package.json' with {type: 'json'};
-
-const packageConfigSchema = z.object({});
-
-export default {
-  name: packageJSON.name,
-  version: packageJSON.version,
-  description: packageJSON.description,
-  install(app, config) {
-    app.waitForService(FileSystemService, fileSystemService => {
-      for (const ext of [".js", ".mjs", ".cjs", ".jsx"]) {
-        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
-      }
-    });
-  },
-  config: packageConfigSchema
-} satisfies TokenRingPlugin<typeof packageConfigSchema>;
-```
+- JavaScript file validation using ESLint
+- Support for multiple JavaScript file extensions (.js, .mjs, .cjs, .jsx)
+- Detailed error and warning messages with location information
+- Seamless integration with TokenRing FileSystemService
+- Configurable validation through ESLint configuration
 
 ## Core Components/API
 
@@ -80,12 +42,23 @@ The `JavascriptFileValidator` is a file validator implementation that uses ESLin
 type FileValidator = (filePath: string, content: string) => Promise<string | null>;
 ```
 
-**Implementation Details:**
+**Implementation Location:**
+```typescript
+// pkg/javascript/JavascriptFileValidator.ts
+import type {FileValidator} from "@tokenring-ai/filesystem/FileSystemService";
+import {ESLint} from "eslint";
 
-- Uses ESLint to analyze JavaScript code
-- Returns `null` if no issues are found
-- Returns a formatted string with all issues if validation fails
-- Each issue includes line, column, severity, message, and rule ID
+const eslint = new ESLint();
+
+const JavascriptFileValidator: FileValidator = async (filePath, content) => {
+  const results = await eslint.lintText(content, {filePath});
+  const messages = results.flatMap(r => r.messages);
+  if (messages.length === 0) return null;
+  return messages.map(m => `${m.line}:${m.column} ${m.severity === 2 ? "error" : "warning"} ${m.message} (${m.ruleId})`).join("\n");
+};
+
+export default JavascriptFileValidator;
+```
 
 **Validation Output Format:**
 ```
@@ -102,18 +75,21 @@ line:column severity message (ruleId)
 
 ### Plugin
 
-The package exports a default `TokenRingPlugin` that registers the JavaScript file validators with the FileSystemService.
+The package exports a default `TokenRingPlugin` from `plugin.ts` that registers the JavaScript file validators with the FileSystemService.
 
-**Plugin Configuration:**
-
+**Plugin Configuration Schema:**
 ```typescript
+import {z} from "zod";
+
 const packageConfigSchema = z.object({});
 ```
 
-The plugin has no configuration options currently.
+The plugin currently has no configuration options.
 
 **Plugin Interface:**
 ```typescript
+import {TokenRingPlugin} from "@tokenring-ai/app";
+
 {
   name: string;
   version: string;
@@ -121,6 +97,34 @@ The plugin has no configuration options currently.
   install(app: TokenRingApp, config: {}): void;
   config: z.ZodObject<{}>;
 }
+```
+
+**Plugin Implementation:**
+```typescript
+// pkg/javascript/plugin.ts
+import {TokenRingPlugin} from "@tokenring-ai/app";
+import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
+import {z} from "zod";
+import JavascriptFileValidator from "./JavascriptFileValidator";
+import packageJSON from './package.json' with {type: 'json'};
+
+const packageConfigSchema = z.object({});
+
+const JS_EXTENSIONS = [".js", ".mjs", ".cjs", ".jsx"];
+
+export default {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
+  install(app, config) {
+    app.waitForService(FileSystemService, fileSystemService => {
+      for (const ext of JS_EXTENSIONS) {
+        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
+      }
+    });
+  },
+  config: packageConfigSchema
+} satisfies TokenRingPlugin<typeof packageConfigSchema>;
 ```
 
 ## Usage Examples
@@ -192,6 +196,14 @@ The package currently has no configuration options. The `packageConfigSchema` is
 const packageConfigSchema = z.object({});
 ```
 
+### ESLint Configuration
+
+This package uses ESLint with the project's existing ESLint configuration. Ensure you have:
+
+1. A valid `.eslintrc` or `eslint.config.js` file in your project
+2. All necessary ESLint plugins installed
+3. Proper JavaScript/TypeScript support as needed
+
 ## Integration
 
 ### With FileSystemService
@@ -226,20 +238,14 @@ await app.installPlugin(javascriptPlugin);
 
 The package registers validators for the following JavaScript file extensions:
 
-- `.js` - Standard JavaScript files
-- `.mjs` - ES Module files
-- `.cjs` - CommonJS files
-- `.jsx` - JavaScript JSX files
+| Extension | Description |
+|-----------|-------------|
+| `.js` | Standard JavaScript files |
+| `.mjs` | ES Module files |
+| `.cjs` | CommonJS files |
+| `.jsx` | JavaScript JSX files |
 
 ## Best Practices
-
-### ESLint Configuration
-
-This package uses ESLint with the project's existing ESLint configuration. Ensure you have:
-
-1. A valid `.eslintrc` or `eslint.config.js` file in your project
-2. All necessary ESLint plugins installed
-3. Proper TypeScript support if validating TypeScript files
 
 ### Validation Performance
 
@@ -271,6 +277,18 @@ if (result) {
 }
 ```
 
+### ESLint Setup
+
+Ensure your project has proper ESLint configuration:
+
+```bash
+# Install ESLint and necessary plugins
+bun add -d eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+
+# Create ESLint configuration
+npx eslint --init
+```
+
 ## Testing
 
 Run the test suite with:
@@ -291,19 +309,62 @@ Generate coverage report:
 bun run test:coverage
 ```
 
+### Test Configuration
+
+The package uses vitest for testing with the following configuration:
+
+```typescript
+// vitest.config.ts
+import {defineConfig} from "vitest/config";
+
+export default defineConfig({
+  test: {
+    include: ["**/*.test.ts"],
+    environment: "node",
+    globals: true,
+    isolate: true,
+  },
+});
+```
+
 ## Dependencies
 
 ### Runtime Dependencies
 
-- **`@tokenring-ai/app`** (0.2.0): Plugin framework and application core
-- **`@tokenring-ai/filesystem`** (0.2.0): FileSystemService for file validation
-- **`eslint`** (^10.0.2): JavaScript linting engine
-- **`zod`** (^4.3.6): Schema validation
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@tokenring-ai/app` | 0.2.0 | Plugin framework and application core |
+| `@tokenring-ai/filesystem` | 0.2.0 | FileSystemService for file validation |
+| `eslint` | ^10.0.3 | JavaScript linting engine |
+| `zod` | ^4.3.6 | Schema validation |
 
 ### Development Dependencies
 
-- **`typescript`** (^5.9.3): TypeScript compiler
-- **`vitest`** (^4.0.18): Testing framework
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `typescript` | ^5.9.3 | TypeScript compiler |
+| `vitest` | ^4.1.0 | Testing framework |
+
+## Package Structure
+
+```
+pkg/javascript/
+├── index.ts                    # Main entry point (currently empty)
+├── JavascriptFileValidator.ts  # File validator implementation
+├── plugin.ts                   # Plugin export
+├── vitest.config.ts           # Test configuration
+├── package.json               # Package metadata
+└── README.md                  # This documentation
+```
+
+## Exports
+
+The package provides the following exports:
+
+| Export Path | Description |
+|-------------|-------------|
+| `@tokenring-ai/javascript/plugin` | Default TokenRingPlugin export |
+| `@tokenring-ai/javascript/JavascriptFileValidator` | File validator function |
 
 ## License
 
