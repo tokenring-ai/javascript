@@ -20,7 +20,7 @@ The `@tokenring-ai/javascript` package provides JavaScript file validation capab
 ## Installation
 
 ```bash
-bun install @tokenring-ai/javascript
+bun add @tokenring-ai/javascript
 ```
 
 ## Features
@@ -105,7 +105,7 @@ import {TokenRingPlugin} from "@tokenring-ai/app";
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
 import {z} from "zod";
-import JavascriptFileValidator from "./JavascriptFileValidator";
+import JavascriptFileValidator from "./JavascriptFileValidator.ts";
 import packageJSON from './package.json' with {type: 'json'};
 
 const packageConfigSchema = z.object({});
@@ -335,15 +335,15 @@ export default defineConfig({
 |---------|---------|---------|
 | `@tokenring-ai/app` | 0.2.0 | Plugin framework and application core |
 | `@tokenring-ai/filesystem` | 0.2.0 | FileSystemService for file validation |
-| `eslint` | ^10.0.3 | JavaScript linting engine |
+| `eslint` | ^10.1.0 | JavaScript linting engine |
 | `zod` | ^4.3.6 | Schema validation |
 
 ### Development Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `typescript` | ^5.9.3 | TypeScript compiler |
-| `vitest` | ^4.1.0 | Testing framework |
+| `typescript` | ^6.0.2 | TypeScript compiler |
+| `vitest` | ^4.1.1 | Testing framework |
 
 ## Package Structure
 

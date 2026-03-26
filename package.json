@@ -1,12 +1,12 @@
 {
   "name": "@tokenring-ai/javascript",
-  "description": "TokenRing Coder Javascript Intregration",
+  "description": "TokenRing Coder JavaScript Integration",
   "version": "0.2.0",
   "dependencies": {
     "@tokenring-ai/app": "0.2.0",
     "zod": "^4.3.6",
     "@tokenring-ai/filesystem": "0.2.0",
-    "eslint": "^10.0.3"
+    "eslint": "^10.1.0"
   },
   "exports": {
     ".": "./index.ts",
@@ -21,7 +21,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "vitest": "^4.1.0",
-    "typescript": "^5.9.3"
+    "vitest": "^4.1.1",
+    "typescript": "^6.0.2"
   }
 }
