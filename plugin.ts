@@ -10,6 +10,7 @@ const JS_EXTENSIONS = [".js", ".mjs", ".cjs", ".jsx"];
 
 export default {
   name: packageJSON.name,
+  displayName: "JavaScript Tooling",
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {

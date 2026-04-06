@@ -1,6 +1,6 @@
 {
   "name": "@tokenring-ai/javascript",
-  "description": "TokenRing Coder JavaScript Integration",
+  "description": "JS-specific development tools including ESLint auto-fix and package management.",
   "version": "0.2.0",
   "dependencies": {
     "@tokenring-ai/app": "0.2.0",

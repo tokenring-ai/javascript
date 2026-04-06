@@ -31,18 +31,20 @@ bun add @tokenring-ai/javascript
 - Seamless integration with TokenRing FileSystemService
 - Configurable validation through ESLint configuration
 
-## Core Components/API
+## Core Components
 
 ### JavascriptFileValidator
 
 The `JavascriptFileValidator` is a file validator implementation that uses ESLint to validate JavaScript files.
 
 **Type Signature:**
+
 ```typescript
 type FileValidator = (filePath: string, content: string) => Promise<string | null>;
 ```
 
-**Implementation Location:**
+**Implementation:**
+
 ```typescript
 // pkg/javascript/JavascriptFileValidator.ts
 import type {FileValidator} from "@tokenring-ai/filesystem/FileSystemService";
@@ -61,6 +63,7 @@ export default JavascriptFileValidator;
 ```
 
 **Validation Output Format:**
+
 ```
 line:column severity message (ruleId)
 line:column severity message (ruleId)
@@ -68,63 +71,24 @@ line:column severity message (ruleId)
 ```
 
 **Example Output:**
+
 ```
 5:3 warning 'x' is assigned a value but never used (@typescript-eslint/no-unused-vars)
 10:1 error Missing semicolon (semi)
 ```
 
-### Plugin
+## Services
 
-The package exports a default `TokenRingPlugin` from `plugin.ts` that registers the JavaScript file validators with the FileSystemService.
+This package does not define a `TokenRingService`. Instead, it integrates with the existing `FileSystemService` from `@tokenring-ai/filesystem` by registering file validators for JavaScript file extensions.
 
-**Plugin Configuration Schema:**
+## Configuration
+
+The package currently has no configuration options. The `packageConfigSchema` is an empty object:
+
 ```typescript
 import {z} from "zod";
 
 const packageConfigSchema = z.object({});
-```
-
-The plugin currently has no configuration options.
-
-**Plugin Interface:**
-```typescript
-import {TokenRingPlugin} from "@tokenring-ai/app";
-
-{
-  name: string;
-  version: string;
-  description: string;
-  install(app: TokenRingApp, config: {}): void;
-  config: z.ZodObject<{}>;
-}
-```
-
-**Plugin Implementation:**
-```typescript
-// pkg/javascript/plugin.ts
-import {TokenRingPlugin} from "@tokenring-ai/app";
-import FileSystemService from "@tokenring-ai/filesystem/FileSystemService";
-import {z} from "zod";
-import JavascriptFileValidator from "./JavascriptFileValidator.ts";
-import packageJSON from './package.json' with {type: 'json'};
-
-const packageConfigSchema = z.object({});
-
-const JS_EXTENSIONS = [".js", ".mjs", ".cjs", ".jsx"];
-
-export default {
-  name: packageJSON.name,
-  version: packageJSON.version,
-  description: packageJSON.description,
-  install(app, config) {
-    app.waitForService(FileSystemService, fileSystemService => {
-      for (const ext of JS_EXTENSIONS) {
-        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
-      }
-    });
-  },
-  config: packageConfigSchema
-} satisfies TokenRingPlugin<typeof packageConfigSchema>;
 ```
 
 ## Usage Examples
@@ -187,22 +151,6 @@ if (result) {
   console.log("No issues found");
 }
 ```
-
-## Configuration
-
-The package currently has no configuration options. The `packageConfigSchema` is an empty object:
-
-```typescript
-const packageConfigSchema = z.object({});
-```
-
-### ESLint Configuration
-
-This package uses ESLint with the project's existing ESLint configuration. Ensure you have:
-
-1. A valid `.eslintrc` or `eslint.config.js` file in your project
-2. All necessary ESLint plugins installed
-3. Proper JavaScript/TypeScript support as needed
 
 ## Integration
 
@@ -349,11 +297,12 @@ export default defineConfig({
 
 ```
 pkg/javascript/
-├── index.ts                    # Main entry point (currently empty)
+├── index.ts                    # Main entry point (exports)
 ├── JavascriptFileValidator.ts  # File validator implementation
 ├── plugin.ts                   # Plugin export
 ├── vitest.config.ts           # Test configuration
 ├── package.json               # Package metadata
+├── LICENSE                    # MIT License
 └── README.md                  # This documentation
 ```
 
@@ -363,6 +312,7 @@ The package provides the following exports:
 
 | Export Path | Description |
 |-------------|-------------|
+| `@tokenring-ai/javascript` | Main entry point (exports all) |
 | `@tokenring-ai/javascript/plugin` | Default TokenRingPlugin export |
 | `@tokenring-ai/javascript/JavascriptFileValidator` | File validator function |
 
