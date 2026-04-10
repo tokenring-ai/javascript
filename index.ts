@@ -1,6 +1,6 @@
 /**
  * @tokenring-ai/javascript package exports
- * 
+ *
  * This package provides JavaScript/TypeScript development tools
  * including ESLint integration for code quality enforcement.
  */
