@@ -15,8 +15,9 @@ export default {
   description: packageJSON.description,
   install(app, _config) {
     app.waitForService(FileSystemService, (fileSystemService) => {
+      const validator = new JavascriptFileValidator();
       for (const ext of JS_EXTENSIONS) {
-        fileSystemService.registerFileValidator(ext, JavascriptFileValidator);
+        fileSystemService.registerFileValidator(ext, validator);
       }
     });
   },

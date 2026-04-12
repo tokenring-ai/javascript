@@ -1,12 +1,12 @@
 {
   "name": "@tokenring-ai/javascript",
-  "description": "JS-specific development tools including ESLint auto-fix and package management.",
+  "description": "JavaScript file validation using ESLint integration with FileSystemService.",
   "version": "0.2.0",
   "dependencies": {
     "@tokenring-ai/app": "0.2.0",
     "zod": "^4.3.6",
     "@tokenring-ai/filesystem": "0.2.0",
-    "eslint": "^10.1.0"
+    "eslint": "^10.2.0"
   },
   "exports": {
     ".": "./index.ts",

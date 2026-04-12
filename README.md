@@ -6,7 +6,7 @@ The `@tokenring-ai/javascript` package provides JavaScript file validation capab
 
 ### Key Features
 
-- Automatic ESLint validation for JavaScript files (.js, .mjs, .cjs, .jsx)
+- ESLint-based validation for JavaScript files (.js, .mjs, .cjs, .jsx)
 - Integration with the FileSystemService for seamless file validation
 - Error and warning reporting with line/column information
 - Support for both errors and warnings in validation results
@@ -54,9 +54,14 @@ const eslint = new ESLint();
 
 const JavascriptFileValidator: FileValidator = async (filePath, content) => {
   const results = await eslint.lintText(content, {filePath});
-  const messages = results.flatMap(r => r.messages);
+  const messages = results.flatMap((r) => r.messages);
   if (messages.length === 0) return null;
-  return messages.map(m => `${m.line}:${m.column} ${m.severity === 2 ? "error" : "warning"} ${m.message} (${m.ruleId})`).join("\n");
+  return messages
+    .map(
+      (m) =>
+        `${m.line}:${m.column} ${m.severity === 2 ? "error" : "warning"} ${m.message} (${m.ruleId})`,
+    )
+    .join("\n");
 };
 
 export default JavascriptFileValidator;
@@ -239,7 +244,7 @@ npx eslint --init
 
 ## Testing
 
-Run the test suite with:
+The package is configured to use vitest for testing. Run the test suite with:
 
 ```bash
 bun run test
