@@ -5,5 +5,5 @@
  * including ESLint integration for code quality enforcement.
  */
 
-export { default as JavascriptFileValidator } from "./JavascriptFileValidator";
+export { default as JavascriptFileValidator } from "./JavascriptService.ts";
 export { default as plugin } from "./plugin";
