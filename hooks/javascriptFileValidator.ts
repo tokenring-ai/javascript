@@ -15,7 +15,7 @@ const callbacks = [
       return agent.requireServiceByType(JavascriptService).validateFile(data.filePath, data.content);
     }
     return null;
-  })
+  }),
 ];
 export default {
   name,

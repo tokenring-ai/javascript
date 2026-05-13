@@ -8,7 +8,7 @@ export default class JavascriptService implements TokenRingService {
 
   private eslint = new ESLint();
 
-  async validateFile(filePath: string, content: string) : Promise<Required<FileValidationResult>> {
+  async validateFile(filePath: string, content: string): Promise<Required<FileValidationResult>> {
     const results = await this.eslint.lintText(content, { filePath });
     const messages = results.flatMap(r => r.messages);
     if (messages.length === 0) return { valid: true, result: "No issues found." };

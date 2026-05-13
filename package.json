@@ -3,10 +3,10 @@
   "description": "JavaScript file validation using ESLint integration with FileSystemService.",
   "version": "0.2.0",
   "dependencies": {
-    "@tokenring-ai/app": "0.2.0",
+    "@tokenring-ai/app": "workspace:*",
     "zod": "^4.3.6",
-    "@tokenring-ai/filesystem": "0.2.0",
-    "@tokenring-ai/lifecycle": "0.2.0",
+    "@tokenring-ai/filesystem": "workspace:*",
+    "@tokenring-ai/lifecycle": "workspace:*",
     "eslint": "^10.2.0"
   },
   "exports": {

@@ -1,9 +1,9 @@
 import type { TokenRingPlugin } from "@tokenring-ai/app";
 import { AgentLifecycleService } from "@tokenring-ai/lifecycle";
 import { z } from "zod";
+import javascriptFileValidator from "./hooks/javascriptFileValidator.ts";
 import JavascriptService from "./JavascriptService.ts";
 import packageJSON from "./package.json" with { type: "json" };
-import javascriptFileValidator from "./hooks/javascriptFileValidator.ts";
 
 const packageConfigSchema = z.object({});
 

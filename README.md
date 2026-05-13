@@ -230,7 +230,7 @@ if (result) {
       message: messageParts.join(' ')
     };
   });
-  
+
   console.log(`Found ${issues.length} issues`);
 }
 ```
@@ -320,11 +320,11 @@ pkg/javascript/
 
 The package provides the following exports:
 
-| Export Path                                              | Description                        |
-|----------------------------------------------------------|------------------------------------|
-| `@tokenring-ai/javascript`                               | Main entry point (exports all)     |
-| `@tokenring-ai/javascript/plugin`                        | Default TokenRingPlugin export     |
-| `@tokenring-ai/javascript/JavascriptFileValidator`       | File validator class               |
+| Export Path                                        | Description                    |
+|----------------------------------------------------|--------------------------------|
+| `@tokenring-ai/javascript`                         | Main entry point (exports all) |
+| `@tokenring-ai/javascript/plugin`                  | Default TokenRingPlugin export |
+| `@tokenring-ai/javascript/JavascriptFileValidator` | File validator class           |
 
 ## License
 
