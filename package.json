@@ -7,7 +7,7 @@
     "zod": "^4.4.3",
     "@tokenring-ai/filesystem": "workspace:*",
     "@tokenring-ai/lifecycle": "workspace:*",
-    "eslint": "^10.2.0"
+    "eslint": "^10.7.0"
   },
   "exports": {
     ".": "./index.ts",
@@ -22,6 +22,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "typescript": "^6.0.2"
+    "typescript": "^7.0.2"
   }
 }
