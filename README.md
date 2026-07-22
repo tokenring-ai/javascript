@@ -330,7 +330,7 @@ npx eslint --init
 
 ## Testing
 
-The package is configured to use vitest for testing. Run the test suite with:
+The package is configured to use bun test for testing. Run the test suite with:
 
 ```bash
 bun run test
@@ -350,11 +350,10 @@ bun run test:coverage
 
 ### Test Configuration
 
-The package uses vitest for testing with the following configuration:
+The package uses bun test for testing with the following configuration:
 
 ```typescript
-// vitest.config.ts
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "bun:test";
 
 export default defineConfig({
   test: {
@@ -383,7 +382,7 @@ export default defineConfig({
 | Package      | Version  | Purpose             |
 |--------------|----------|---------------------|
 | `typescript` | ^6.0.2   | TypeScript compiler |
-| `vitest`     | ^4.1.1   | Testing framework   |
+| `bun test`     | builtin  | Testing framework   |
 
 ## Package Structure
 
@@ -394,7 +393,6 @@ pkg/javascript/
 ├── hooks/
 │   └── javascriptFileValidator.ts        # Lifecycle hook for file validation
 ├── plugin.ts                             # Plugin export
-├── vitest.config.ts                      # Test configuration
 ├── package.json                          # Package metadata
 ├── LICENSE                               # MIT License
 └── README.md                             # This documentation
