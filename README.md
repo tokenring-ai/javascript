@@ -134,7 +134,7 @@ const JAVASCRIPT_EXTENSIONS = new Set([".js", ".mjs", ".cjs", ".jsx"]);
 const callbacks = [
   new HookCallback(FileValidatonAfterFileWrite, (data, agent) => {
     if (JAVASCRIPT_EXTENSIONS.has(data.fileExtension)) {
-      return agent.requireServiceByType(JavascriptService).validateFile(data.filePath, data.content);
+      return agent.requireService(JavascriptService).validateFile(data.filePath, data.content);
     }
     return null;
   }),

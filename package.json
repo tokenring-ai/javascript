@@ -4,7 +4,6 @@
   "version": "0.2.0",
   "dependencies": {
     "@tokenring-ai/app": "workspace:*",
-    "zod": "^4.4.3",
     "@tokenring-ai/filesystem": "workspace:*",
     "@tokenring-ai/lifecycle": "workspace:*",
     "eslint": "^10.7.0"
